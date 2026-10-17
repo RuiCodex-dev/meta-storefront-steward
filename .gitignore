@@ -1,0 +1,19 @@
+# data never leaves this machine
+data/
+*.sqlite
+*.db
+# secrets
+.env
+*.env
+*.key
+*.pem
+*.p8
+*service-account*.json
+# python / node
+__pycache__/
+.venv/
+node_modules/
+# training artefacts
+checkpoints/
+outputs/
+*.safetensors
