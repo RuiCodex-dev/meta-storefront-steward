@@ -4,7 +4,7 @@ Status: design only, written 2026-10-18 before the event. No project code exists
 
 ## 1. The pitch in one paragraph
 
-Rui Codex is one person with 19 apps and games on Google Play (some also on the App Store), listed in many languages.
+Rui Codex is a small studio with 19 apps and games on Google Play (some also on the App Store), listed in many languages.
 Every release cycle costs a day of the same loop: read reviews in languages the developer does not speak, match them to
 crash and ANR data and to the release that caused them, then write replies, release notes and new screenshots.
 **Storefront Steward** does that loop as an agent that runs on the developer's own store data. A small open-weights
