@@ -4,7 +4,7 @@ Private working repository for Rui Codex's entry to the Meta Global AI Developer
 Linear: RUI-268. **Private. Do not change visibility, add collaborators or push to another remote without the
 owner's explicit approval for that action.**
 
-Status (2026-10-18): design only. No project code is written before the event starts on 2026-10-26.
+Status (2026-10-26): kickoff done, rules read (`docs/rules/`), plan v2 in `docs/04-BUILD-PLAN.md`. Building period Oct 27 - Nov 4; no project code before 2026-10-27.
 
 | Document | Content |
 |---|---|
