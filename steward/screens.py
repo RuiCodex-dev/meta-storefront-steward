@@ -21,11 +21,12 @@ from PIL import Image, ImageDraw, ImageFont
 
 from . import config, media
 
-FONT_CANDIDATES = [r"C:\Windows\Fonts\segoeuib.ttf", r"C:\Windows\Fonts\arialbd.ttf"]
+FONT_CANDIDATES = [r"C:\Windows\Fonts\seguisb.ttf", r"C:\Windows\Fonts\segoeuib.ttf", r"C:\Windows\Fonts\arialbd.ttf"]
 SCENE_PROMPT = ("Product photograph for an app store listing: one modern smartphone standing upright and perfectly "
                 "front-facing, not tilted, screen facing the camera, thin bezels, the screen completely black and "
-                "empty. {mood} Soft natural light, shallow depth of field, generous empty space above the phone "
-                "for a headline. No text, no logos, no hands, no other devices.")
+                "empty. The phone fills about two thirds of the image height and sits in the lower part of the frame. "
+                "{mood} Soft natural light, shallow depth of field, calm empty space above the phone for a headline. "
+                "No text, no logos, no hands, no other devices.")
 
 
 def _font(size: int):
@@ -97,24 +98,31 @@ def compose(capture_path: str, headline: str, *, app_slug: str, mood: str, out_d
     mask = _rounded_mask(w, h, r=max(6, int(w * 0.07)))
     final = scene.copy()
     final.paste(ui, (x1, y1), mask)
-    # caption in a real font, above the phone, on a soft scrim for legibility
-    draw = ImageDraw.Draw(final, "RGBA")
-    f = _font(max(28, final.width // 14))
-    lines, cur = [], ""
-    for word in headline.split():
-        test = (cur + " " + word).strip()
-        if draw.textlength(test, font=f) > final.width * 0.86 and cur:
-            lines.append(cur)
-            cur = word
-        else:
-            cur = test
-    lines.append(cur)
-    y = int(final.height * 0.04)
+    # caption in a real font on a soft top scrim (no outline effects)
+    f = _font(max(28, final.width // 15))
+    draw = ImageDraw.Draw(final)
+    words = headline.split()
+    if draw.textlength(headline, font=f) <= final.width * 0.84:
+        lines = [headline]
+    else:  # two balanced lines: choose the break that minimises the longer line
+        best = min(range(1, len(words)), key=lambda k: max(draw.textlength(" ".join(words[:k]), font=f),
+                                                            draw.textlength(" ".join(words[k:]), font=f)))
+        lines = [" ".join(words[:best]), " ".join(words[best:])]
+    top = int(final.height * 0.05)
+    text_h = int(f.size * 1.18) * len(lines)
+    scrim_h = min(y1 - 4, top + text_h + int(final.height * 0.06))
+    if scrim_h > 0:
+        grad = Image.new("L", (1, scrim_h))
+        for yy in range(scrim_h):
+            grad.putpixel((0, yy), int(150 * (1 - yy / scrim_h) ** 1.4))
+        shade = Image.new("RGB", (final.width, scrim_h), (12, 14, 18))
+        final.paste(shade, (0, 0), grad.resize((final.width, scrim_h)))
+    draw = ImageDraw.Draw(final)
+    y = top
     for ln in lines:
         tw = draw.textlength(ln, font=f)
-        draw.text(((final.width - tw) / 2, y), ln, font=f, fill=(255, 255, 255, 255),
-                  stroke_width=max(2, f.size // 18), stroke_fill=(0, 0, 0, 160))
-        y += int(f.size * 1.15)
+        draw.text(((final.width - tw) / 2, y), ln, font=f, fill=(255, 255, 255))
+        y += int(f.size * 1.18)
     fid = fidelity(final, ui, (x1, y1, x1 + w, y1 + h), mask)
     result.update({"placed": [x1, y1, x1 + w, y1 + h], "resize_scale": round(scale, 4), "fidelity": fid})
     if fid["max_abs_diff"] != 0 or y > y1:
