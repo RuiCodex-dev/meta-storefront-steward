@@ -1,0 +1,45 @@
+"""Paths and credential locations.
+
+Credentials are read at run time from files outside the repository and are never logged.
+Every path can be overridden with an environment variable so tests and other machines work.
+"""
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+DATA = Path(os.environ.get("STEWARD_DATA", ROOT / "data"))          # git-ignored
+RAW = DATA / "raw"                                                   # store exports, never leave the machine
+PRIVATE = DATA / "private"                                           # re-identification map only
+DB_PATH = Path(os.environ.get("STEWARD_DB", DATA / "clean" / "steward.db"))
+
+KEYS_DIR = Path(os.environ.get("STEWARD_KEYS", Path.home() / ".ruicodex-keys"))
+META_KEY_FILE = KEYS_DIR / "storefront-steward" / "meta.json"
+BASETEN_KEY_FILE = KEYS_DIR / "baseten.json"
+PSEUDONYM_KEY_FILE = KEYS_DIR / "storefront-steward" / "pseudonym.key"
+PLAY_SERVICE_ACCOUNT = Path(os.environ.get(
+    "STEWARD_PLAY_SA",
+    Path.home() / ".claude" / "mcp-servers" / "app-publish-mcp" / "service-account.json"))
+
+META_BASE_URL = "https://api.meta.ai/v1"
+BASETEN_BASE_URL = "https://inference.baseten.co/v1"
+
+
+def _read_json(path: Path) -> dict:
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def meta_api_key() -> str:
+    return _read_json(META_KEY_FILE)["api_key"]
+
+
+def baseten_api_key() -> str:
+    return _read_json(BASETEN_KEY_FILE)["api_key"]
+
+
+def ensure_dirs() -> None:
+    for p in (RAW, PRIVATE, DB_PATH.parent):
+        p.mkdir(parents=True, exist_ok=True)
