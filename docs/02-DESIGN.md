@@ -196,7 +196,7 @@ disclosed in the description); captions as .srt. Made with HyperFrames.
 
 | Time | Scene | What is shown |
 |---|---|---|
-| 0:00-0:15 | The problem | The real Play Console of Rui Codex: 19 apps, reviews in many languages; one line: "one developer, no community team" |
+| 0:00-0:15 | The problem | The real Play Console of Rui Codex: 19 apps, reviews in many languages; one line: "a small studio, no community team" |
 | 0:15-0:40 | Ingest | Live run: connectors pull this week's reviews and vitals; the privacy layer turns names into pseudonyms on screen |
 | 0:40-1:10 | Triage | Items stream in, tagged by the fine-tuned Glimmer student; cut to the evaluation table (student vs Spark vs baselines, cost per 1k) |
 | 1:10-1:45 | One issue, many languages | A real cluster (whatever the data contains on the day; the "level-12 freeze" in the application was an illustration) with reviews in several languages, the linked crash issue and the release that introduced it; citations clickable |
@@ -222,7 +222,7 @@ hosting; otherwise the video plus a recorded unedited run.
 | Posting a live reply on camera goes wrong | low | medium | dry-run rehearsal; post only to a review the owner chose; reply text approved by the owner first |
 | Muse Image alters UI or adds text | medium | high (honesty) | it never receives the UI; fidelity guard rejects; captions by our renderer |
 | Privacy leak into video, repo or Meta | low | high | pseudonymise before models; outbound PII scan; repo has no data; video reviewed frame by frame before upload |
-| Time: 10 days, solo, other hackathons in parallel (Open Agent 10-22..27, Airwallex to 11-13, Game Jam to 11-07) | high | high | strict cut list (below); stretch features only after the core demo path is recorded once |
+| Time: 10 days, other hackathons in parallel (Open Agent 10-22..27, Airwallex to 11-13, Game Jam to 11-07) | high | high | strict cut list (below); stretch features only after the core demo path is recorded once |
 | API key or service-account leak | low | critical | keys read at runtime from `.ruicodex-keys` or the existing service-account path; `.gitignore`; secret scan before every commit |
 
 ### Cut list (in order, if time runs short)
