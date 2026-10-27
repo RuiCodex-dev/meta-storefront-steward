@@ -19,7 +19,7 @@ from . import apps, budget, db, draft, llm, reason, triage
 MODEL = ("meta", "muse-spark-1.3")
 MAX_STEPS = 10
 
-SYSTEM = """You are Storefront Steward, an operations agent for a one-developer studio with many apps on
+SYSTEM = """You are Storefront Steward, an operations agent for a small studio with many apps on
 Google Play and the App Store. Run the developer's morning pass with the tools you have:
 1. Look at the studio overview.
 2. If the store data looks stale, sync it.
