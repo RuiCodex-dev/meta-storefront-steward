@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Storefront Steward{% endblock %}</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header>
+  <div class="brand">Storefront Steward<small>store feedback, triaged and answered, with a human click</small></div>
+  <nav>
+    {% set p = request.url.path %}
+    <a href="/" class="{{ 'on' if p == '/' }}">Overview</a>
+    <a href="/inbox" class="{{ 'on' if p.startswith('/inbox') }}">Inbox</a>
+    <a href="/board" class="{{ 'on' if p.startswith('/board') }}">Issue board</a>
+    <a href="/queue" class="{{ 'on' if p.startswith('/queue') }}">Approval queue</a>
+    <a href="/receipts" class="{{ 'on' if p.startswith('/receipts') }}">Receipts</a>
+  </nav>
+  {% if live() %}<span class="mode live">LIVE: approved replies are posted</span>
+  {% else %}<span class="mode">Dry run: nothing is posted</span>{% endif %}
+</header>
+<main>
+{% block body %}{% endblock %}
+</main>
+</body>
+</html>

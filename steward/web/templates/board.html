@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Issue board</h1>
+<p class="lede">Muse Spark read the whole studio in one context (every review, crash and release) and grouped the
+actionable signals. Every id it cites exists, and every quote was checked word for word against the source
+before it reached this page. Run <span class="pid">{{ run }}</span>.</p>
+{% for c in clusters %}
+<div class="card cluster">
+  <div class="row"><span class="sev sev-{{ c.severity }}">S{{ c.severity }}</span><h3>{{ c.title }}</h3>
+  <span class="{{ 'ok' if c.link_rule == 'verified' else 'bad' }} small">{{ c.link_rule }}</span></div>
+  <div class="meta">{% for a in c.package.split(',') %}<span class="chip">{{ a | short }}</span>{% endfor %}
+  · {{ c.reviews | length }} review(s) · {{ c.crash_n }} crash/ANR issue(s) · first seen {{ c.first_seen_version }}</div>
+  <div>{{ c.summary }}</div>
+  {% for e in c.ev.evidence %}
+    {% set src = (c.reviews | selectattr('id', 'equalto', e.id) | list | first) %}
+    <div class="quote">{% if src %}{{ src.text | highlight(e.quote) }}{% endif %}
+    <div class="pid">{{ e.id }} · {{ src.lang if src else '' }}</div></div>
+  {% endfor %}
+  {% if c.ev.links %}<div class="small muted">Review-to-crash links: {% for l in c.ev.links %}{{ l.review }} → {{ l.crash }} ({{ l.rule }}){% if not loop.last %}; {% endif %}{% endfor %}</div>{% endif %}
+  {% if c.ev.problems %}<div class="small bad">Verifier removed: {{ c.ev.problems | join('; ') }}</div>{% endif %}
+  <div class="action"><b>Next action:</b> {{ c.ev.action }}</div>
+</div>
+{% endfor %}
+{% endblock %}

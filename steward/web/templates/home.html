@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>One developer, {{ stats.apps }} apps, two stores</h1>
+<p class="lede">Every written review, every crash and ANR, every release, read in one place. Reviewer identities are
+replaced by keyed pseudonyms before any model sees a word. {{ stats.excluded }} apps are excluded by policy
+(health-related, or not written by the studio).</p>
+<div class="grid">
+  <div class="card stat"><b>{{ stats.reviews }}</b><span>real written reviews (full history)</span></div>
+  <div class="card stat"><b>{{ stats.crashes }}</b><span>crash / ANR issues, 90 days</span></div>
+  <div class="card stat"><b>{{ stats.releases }}</b><span>releases across tracks</span></div>
+  <div class="card stat"><b>{{ stats.clusters }}</b><span>issue clusters (latest run)</span></div>
+  <div class="card stat"><b>{{ stats.pending }}</b><span>replies waiting for approval</span></div>
+</div>
+
+<h2>Model spend (hard caps enforced before every call)</h2>
+<div class="grid">
+{% for prov, (spent, cap) in spend.items() %}
+  <div class="card"><div class="row"><b>{{ 'Meta Model API' if prov == 'meta' else 'Baseten (Muse Spark Open)' }}</b>
+  <span class="muted small">${{ '%.2f' % spent }} of ${{ '%.0f' % cap }}</span></div>
+  <div class="bar" style="margin-top:8px"><i style="width: {{ (100 * spent / cap) | round(1) }}%"></i></div></div>
+{% endfor %}
+</div>
+
+{% if ev %}
+<h2>Triage evaluation</h2>
+<p class="lede small">Macro-F1 with 95% bootstrap intervals. "Real" = every written review the studio has,
+labelled by Claude and spot-checked by the developer. "Held-out synthetic" = reviews written by a different
+model than the one that wrote the training data. Never mixed.</p>
+<table>
+<tr><th>System</th><th>Runs on</th><th>Real reviews (n={{ ev.n_real }})</th><th>Held-out synthetic (n={{ ev.n_synth }})</th><th>$ / 1k reviews</th><th>ms / review</th></tr>
+{% for s in ev.systems %}
+<tr><td><b>{{ s.name }}</b><div class="muted small">{{ s.note }}</div></td><td class="small">{{ s.where }}</td>
+<td class="num">{{ '%.2f' % s.real[0] if s.real else '-' }} {% if s.real %}<span class="ci">[{{ '%.2f' % s.real[1] }}, {{ '%.2f' % s.real[2] }}]</span>{% endif %}</td>
+<td class="num">{{ '%.2f' % s.synth[0] if s.synth else '-' }} {% if s.synth %}<span class="ci">[{{ '%.2f' % s.synth[1] }}, {{ '%.2f' % s.synth[2] }}]</span>{% endif %}</td>
+<td class="num">{{ s.usd_per_1k if s.usd_per_1k is not none else '-' }}</td><td class="num">{{ s.ms if s.ms is not none else '-' }}</td></tr>
+{% endfor %}
+</table>
+{% endif %}
+{% endblock %}

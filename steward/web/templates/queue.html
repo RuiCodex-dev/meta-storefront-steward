@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Approval queue</h1>
+<p class="lede">Muse Spark drafts each reply in the reviewer's language; a deterministic verifier blocks drafts that
+are too long, in the wrong language, promise dates or refunds, contain personal data or cite something that does
+not exist. Nothing reaches a store without an approval click{% if not live() %}, and this process is in dry-run
+mode{% endif %}.</p>
+{% for d in rows %}
+<div class="card cluster">
+  <div class="row"><b>{{ d.package | short }}</b><span class="muted small">{{ d.store }} · {{ '★' * (d.rating or 0) }}</span>
+  <span class="pid">{{ d.item_id }}</span><span class="chip">{{ d.status }}</span></div>
+  <div class="quote">{{ d.review }}</div>
+  {% set probs = d.verifier | loads %}
+  <div class="small">{% if probs %}<span class="bad">Verifier: {{ probs | join('; ') }}</span>
+  {% else %}<span class="ok">Verifier: pass</span>{% endif %} · {{ (d.edited_text or d.text) | length }} characters · {{ d.lang }}</div>
+  <form method="post" action="/queue/{{ d.id }}">
+    <textarea name="text">{{ d.edited_text or d.text }}</textarea>
+    <div class="row" style="margin-top:6px">
+    {% if d.status == 'pending' %}
+      <button class="primary" name="action" value="approve">Approve</button>
+      <button class="danger" name="action" value="reject">Reject</button>
+    {% elif d.status == 'approved' %}
+      <button class="primary" name="action" value="post">{{ 'Post to store' if live() else 'Post (dry run)' }}</button>
+    {% endif %}
+    {% if d.post_result %}<span class="small muted">{{ d.post_result }}</span>{% endif %}
+    </div>
+  </form>
+</div>
+{% endfor %}
+{% if audit %}
+<h2>Audit log</h2>
+<table><tr><th>When (UTC)</th><th>Who</th><th>What</th><th>Target</th><th>Detail</th></tr>
+{% for a in audit %}<tr><td class="num small">{{ a.ts }}</td><td class="small">{{ a.actor }}</td><td class="small">{{ a.action }}</td>
+<td class="pid">{{ a.target }}</td><td class="small">{{ a.detail }}</td></tr>{% endfor %}</table>
+{% endif %}
+{% endblock %}

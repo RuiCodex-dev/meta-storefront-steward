@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Receipts</h1>
+<p class="lede">Every model call: model, mode (Standard only), tokens, cost and latency. Prompts are stored only as a
+short hash. Caps are checked against the worst case before a call is sent.</p>
+<div class="grid">
+{% for prov, (spent, cap) in spend.items() %}
+<div class="card stat"><b>${{ '%.2f' % spent }}</b><span>{{ prov }} spent · cap ${{ '%.0f' % cap }}</span></div>
+{% endfor %}
+</div>
+<h2>By model and purpose</h2>
+<table><tr><th>Provider</th><th>Model</th><th>Purpose</th><th>Calls</th><th>Input tok</th><th>Cached</th><th>Output tok</th><th>USD</th><th>Avg ms</th></tr>
+{% for r in rows %}<tr><td>{{ r.provider }}</td><td class="small">{{ r.model }}</td><td class="small">{{ r.purpose }}</td>
+<td class="num">{{ r.n }}</td><td class="num">{{ r.tin }}</td><td class="num">{{ r.tcached }}</td><td class="num">{{ r.tout }}</td>
+<td class="num">{{ '%.4f' % (r.usd or 0) }}</td><td class="num">{{ (r.lat or 0) | int }}</td></tr>{% endfor %}
+</table>
+<h2>Latest calls</h2>
+<table><tr><th>UTC</th><th>Model</th><th>Purpose</th><th>In / cached / out</th><th>USD</th><th>ms</th><th>Prompt hash</th><th>Status</th></tr>
+{% for r in recent %}<tr><td class="num small">{{ r.ts }}</td><td class="small">{{ r.model }}</td><td class="small">{{ r.purpose }}</td>
+<td class="num">{{ r.input_tokens }} / {{ r.cached_tokens }} / {{ r.output_tokens }}</td><td class="num">{{ '%.5f' % r.cost_usd }}</td>
+<td class="num">{{ r.latency_ms }}</td><td class="pid">{{ r.prompt_sha }}</td><td class="small">{{ r.status }}</td></tr>{% endfor %}
+</table>
+{% endblock %}

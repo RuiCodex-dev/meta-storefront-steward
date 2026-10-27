@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Inbox</h1>
+<p class="lede">Every real written review across both stores, sorted by severity. Text is shown after personal data
+was removed; ids are pseudonyms.</p>
+<table>
+<tr><th>Severity</th><th>App</th><th>Review</th><th>Triage</th></tr>
+{% for r in rows %}
+<tr>
+<td>{% if r.severity %}<span class="sev sev-{{ r.severity }}">S{{ r.severity }}</span>{% endif %}</td>
+<td class="small"><b>{{ r.package | short }}</b><div class="muted">{{ r.store }} · {{ '★' * (r.rating or 0) }}</div>
+<div class="pid">{{ r.id }}</div></td>
+<td>{% if r.title %}<b>{{ r.title }}</b> · {% endif %}{{ r.text }}
+<div class="muted small">{{ r.lang or '?' }} · v{{ r.version_name or '?' }} · {{ (r.created_at or '')[:10] }}</div></td>
+<td class="small">{% if r.category %}<span class="chip">{{ r.category }}</span><div class="muted">{{ r.gloss }}</div>
+<div class="muted">by {{ r.lsource }}</div>{% endif %}</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

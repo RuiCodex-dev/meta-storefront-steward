@@ -87,7 +87,7 @@ _DEF = {c: d for c, d in [
     ("spam_or_offtopic", "unrelated, gibberish, promotion")]}
 
 
-def generate_batch(gen: str, package: str, category: str, n: int, seed: int) -> list[dict]:
+def generate_batch(gen: str, package: str, category: str, n: int, seed: int, max_tokens: int | None = None) -> list[dict]:
     provider, model = GENERATORS[gen]
     con = db.connect()
     rnd = random.Random(seed)
@@ -98,7 +98,7 @@ def generate_batch(gen: str, package: str, category: str, n: int, seed: int) -> 
     # the app's own store text can contain our support e-mail or a URL: scrub before it leaves
     msg, _ = scrub(msg)
     res = llm.chat(provider, model, [{"role": "user", "content": msg}], purpose=f"synth-{gen}",
-                   max_tokens=6000 + 400 * n, schema=SCHEMA, temperature=1.0, con=con,
+                   max_tokens=max_tokens or (6000 + 400 * n), schema=SCHEMA, temperature=1.0, con=con,
                    reasoning_effort="low" if provider == "meta" else None)
     out = []
     for i, r in enumerate(res.data["reviews"]):
