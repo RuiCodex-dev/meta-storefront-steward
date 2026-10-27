@@ -79,6 +79,11 @@ CREATE TABLE IF NOT EXISTS drafts (
     created_at TEXT, decided_at TEXT, posted_at TEXT, post_result TEXT
 );
 
+CREATE TABLE IF NOT EXISTS app_context (
+    package TEXT, language TEXT, title TEXT, short_description TEXT, full_description TEXT, fetched_at TEXT,
+    PRIMARY KEY (package, language)
+);
+
 CREATE TABLE IF NOT EXISTS audit (
     id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, actor TEXT, action TEXT, target TEXT, detail TEXT
 );

@@ -93,7 +93,7 @@ def chat(provider: str, model: str, messages: list[dict], *, purpose: str, max_t
     # 2. budget gate (worst case: no cache, full output)
     prompt_text = "\n".join(_texts(messages))
     worst = budget.Usage(input_tokens=_approx_tokens(prompt_text) + 200, output_tokens=max_tokens)
-    budget.reserve(con, provider, model, worst)
+    reserved = budget.reserve(con, provider, model, worst)
     kw: dict[str, Any] = dict(model=model, messages=messages, max_tokens=max_tokens)
     if temperature is not None:
         kw["temperature"] = temperature
@@ -108,9 +108,11 @@ def chat(provider: str, model: str, messages: list[dict], *, purpose: str, max_t
     try:
         resp = client(provider).chat.completions.create(**kw)
     except Exception:
+        budget.release(provider, reserved)
         budget.record(con, provider, model, purpose, budget.Usage(), int((time.time() - t0) * 1000), prompt_text,
                       status="error")
         raise
+    budget.release(provider, reserved)
     ms = int((time.time() - t0) * 1000)
     u = resp.usage
     cached = 0

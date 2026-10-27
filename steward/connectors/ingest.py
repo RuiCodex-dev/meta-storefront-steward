@@ -231,6 +231,23 @@ def ingest_releases(con) -> int:
     return n
 
 
+def ingest_listings(con) -> int:
+    from . import play
+    svc, n = play.publisher(), 0
+    for app in apps.included():
+        try:
+            ls = play.listings(app.package, svc)
+        except Exception:
+            continue
+        for x in ls:
+            con.execute("INSERT OR REPLACE INTO app_context VALUES (?,?,?,?,?,?)", (
+                app.package, x.get("language"), x.get("title"), x.get("shortDescription"),
+                x.get("fullDescription"), _now()))
+            n += 1
+    con.commit()
+    return n
+
+
 def run_all() -> dict:
     config.ensure_dirs()
     con = db.connect()
@@ -241,5 +258,6 @@ def run_all() -> dict:
     out["asc_reviews"] = ingest_asc(con)
     out["crash_issues"] = ingest_vitals(con)
     out["releases"] = ingest_releases(con)
+    out["listings"] = ingest_listings(con)
     out["items_total"] = con.execute("SELECT COUNT(*) FROM items WHERE synthetic=0").fetchone()[0]
     return out

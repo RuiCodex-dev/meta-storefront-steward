@@ -35,3 +35,13 @@ def test_cap_blocks_before_sending(tmp_path):
 
 def test_caps_are_the_owner_numbers():
     assert budget.CAPS_USD["meta"] == 140.0 and budget.CAPS_USD["baseten"] == 90.0
+
+
+def test_in_flight_calls_count_against_the_cap(tmp_path):
+    con = db.connect(tmp_path / "b.db")
+    big = budget.Usage(output_tokens=20_000_000)          # 85 USD worst case each
+    w = budget.reserve(con, "meta", "muse-spark-1.3", big)
+    with pytest.raises(budget.BudgetExceeded):             # a second parallel call would cross 140
+        budget.reserve(con, "meta", "muse-spark-1.3", big)
+    budget.release("meta", w)
+    budget.release("meta", budget.reserve(con, "meta", "muse-spark-1.3", big))

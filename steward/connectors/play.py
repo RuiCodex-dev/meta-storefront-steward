@@ -110,6 +110,20 @@ def list_tracks(pkg: str, svc=None) -> list[dict]:
                 pass
 
 
+def listings(pkg: str, svc=None) -> list[dict]:
+    """Store listing text per language, read through a throw-away edit (deleted, never committed)."""
+    svc = svc or publisher()
+    with _Lock(pkg):
+        edit = svc.edits().insert(packageName=pkg, body={}).execute()
+        try:
+            return svc.edits().listings().list(packageName=pkg, editId=edit["id"]).execute().get("listings", [])
+        finally:
+            try:
+                svc.edits().delete(packageName=pkg, editId=edit["id"]).execute()
+            except HttpError:
+                pass
+
+
 def error_issues(pkg: str, days: int = 90, svc=None) -> list[dict]:
     svc = svc or reporting()
     end = dt.datetime.now(dt.timezone.utc).replace(minute=0, second=0, microsecond=0)

@@ -16,6 +16,7 @@ from __future__ import annotations
 import datetime as _dt
 import hashlib
 import sqlite3
+import threading
 from dataclasses import dataclass
 
 CAPS_USD = {"meta": 140.0, "baseten": 90.0, "local": float("inf")}
@@ -32,6 +33,10 @@ TOKEN_PRICES = {
 PER_IMAGE = {("meta", "muse-image-1.0"): 0.01, ("meta", "sam-3.1"): 2.50 / 1000}
 PER_FRAME = {("meta", "sam-3.1"): 0.20 / 1000}
 FORBIDDEN_MODEL_SUBSTRINGS = ("contributor",)   # Contributor mode is never used (data plan)
+
+
+_LOCK = threading.Lock()
+_PENDING: dict[str, float] = {}   # worst-case cost of calls that are in flight, per provider
 
 
 class BudgetExceeded(RuntimeError):
@@ -79,15 +84,28 @@ def spent(con: sqlite3.Connection, provider: str) -> float:
 
 
 def reserve(con: sqlite3.Connection, provider: str, model: str, worst: Usage) -> float:
-    """Raise BudgetExceeded if the worst case would cross the cap. Returns the worst-case cost."""
+    """Raise BudgetExceeded if spent + in-flight + this worst case would cross the cap.
+
+    The worst case is added to an in-flight total under a lock, so parallel workers cannot all pass the
+    check against the same ledger value. `record` (or `release`) removes it again.
+    """
     check_model(provider, model)
     worst_usd = cost(provider, model, worst)
     cap = CAPS_USD[provider]
-    already = spent(con, provider)
-    if already + worst_usd > cap:
-        raise BudgetExceeded(
-            f"{provider}: spent {already:.4f} + worst case {worst_usd:.4f} > cap {cap:.2f} USD; call refused")
+    with _LOCK:
+        already = spent(con, provider)
+        pending = _PENDING.get(provider, 0.0)
+        if already + pending + worst_usd > cap:
+            raise BudgetExceeded(
+                f"{provider}: spent {already:.4f} + in flight {pending:.4f} + worst case {worst_usd:.4f} "
+                f"> cap {cap:.2f} USD; call refused")
+        _PENDING[provider] = pending + worst_usd
     return worst_usd
+
+
+def release(provider: str, worst_usd: float) -> None:
+    with _LOCK:
+        _PENDING[provider] = max(0.0, _PENDING.get(provider, 0.0) - worst_usd)
 
 
 def record(con: sqlite3.Connection, provider: str, model: str, purpose: str, u: Usage,
