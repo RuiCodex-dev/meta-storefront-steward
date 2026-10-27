@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Label spot check</h1>
+<p class="lede">The evaluation's gold labels were assigned by Claude. This page lets the developer check a fixed sample
+of {{ rows | length }} of them (every actionable real review, 14 real praise reviews, 30 held-out synthetic reviews).
+Progress: {{ done }} / {{ rows | length }} checked, {{ agree }} agreed.</p>
+{% for r in rows %}
+<div class="card cluster" id="{{ r.id }}">
+  <div class="row"><span class="pid">{{ r.id }}</span><span class="chip">{{ 'synthetic' if r.synthetic else 'real' }}</span>
+  <span class="chip">{{ r.category }}</span><span class="sev sev-{{ r.severity }}">S{{ r.severity }}</span>
+  {% if r.verdict %}<span class="{{ 'ok' if r.verdict == 'agree' else 'bad' }} small">{{ r.verdict }}{% if r.corrected %} → {{ r.corrected }}{% endif %}</span>{% endif %}</div>
+  <div class="quote">{{ r.text }}</div>
+  <form method="post" action="/spotcheck/{{ r.id }}" class="row">
+    <button class="primary" name="verdict" value="agree">Agree</button>
+    <select name="corrected"><option value="">correct category…</option>{% for c in cats %}<option>{{ c }}</option>{% endfor %}</select>
+    <button class="danger" name="verdict" value="disagree">Disagree</button>
+  </form>
+</div>
+{% endfor %}
+{% endblock %}

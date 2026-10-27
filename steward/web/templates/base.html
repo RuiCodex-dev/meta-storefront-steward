@@ -17,6 +17,7 @@
     <a href="/board" class="{{ 'on' if p.startswith('/board') }}">Issue board</a>
     <a href="/queue" class="{{ 'on' if p.startswith('/queue') }}">Approval queue</a>
     <a href="/receipts" class="{{ 'on' if p.startswith('/receipts') }}">Receipts</a>
+    <a href="/spotcheck" class="{{ 'on' if p.startswith('/spotcheck') }}">Spot check</a>
   </nav>
   {% if live() %}<span class="mode live">LIVE: approved replies are posted</span>
   {% else %}<span class="mode">Dry run: nothing is posted</span>{% endif %}

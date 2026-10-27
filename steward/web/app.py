@@ -156,3 +156,44 @@ def agent_run():
     from .. import agent
     agent.run()
     return RedirectResponse("/agent", status_code=303)
+
+
+# ------------------------------------------------------------------ owner spot check of the Claude gold labels
+def _spot_sample(con) -> list[str]:
+    """Fixed, seeded sample: every actionable real review, 14 real praise items, 30 held-out synthetic items."""
+    import random
+    rnd = random.Random(20261029)
+    real = con.execute("SELECT l.item_id, l.category FROM labels l JOIN splits s ON s.item_id=l.item_id "
+                       "WHERE s.split='test_real' AND l.source='gold_claude' ORDER BY l.item_id").fetchall()
+    act = [r[0] for r in real if r[1] not in ("praise", "spam_or_offtopic")]
+    rest = [r[0] for r in real if r[0] not in act]
+    synth = [r[0] for r in con.execute("SELECT l.item_id FROM labels l JOIN splits s ON s.item_id=l.item_id "
+                                       "WHERE s.split='test_synth' AND l.source='gold_claude' ORDER BY l.item_id")]
+    return act + rnd.sample(rest, min(14, len(rest))) + rnd.sample(synth, min(30, len(synth)))
+
+
+@app.get("/spotcheck", response_class=HTMLResponse)
+def spotcheck(request: Request):
+    con = _con()
+    con.execute("CREATE TABLE IF NOT EXISTS spotcheck (item_id TEXT PRIMARY KEY, verdict TEXT, corrected TEXT, ts TEXT)")
+    ids = _spot_sample(con)
+    rows = []
+    for i in ids:
+        r = con.execute("SELECT i.id, i.text, i.synthetic, l.category, l.severity, sc.verdict, sc.corrected FROM items i "
+                        "JOIN labels l ON l.item_id=i.id AND l.source='gold_claude' LEFT JOIN spotcheck sc "
+                        "ON sc.item_id=i.id WHERE i.id=?", (i,)).fetchone()
+        rows.append(dict(r))
+    done = sum(1 for r in rows if r["verdict"])
+    agree = sum(1 for r in rows if r["verdict"] == "agree")
+    from ..taxonomy import CATEGORIES
+    return T.TemplateResponse(request, "spotcheck.html", {"rows": rows, "done": done, "agree": agree,
+                                                          "cats": CATEGORIES})
+
+
+@app.post("/spotcheck/{item_id}")
+def spotcheck_save(item_id: str, verdict: str = Form(...), corrected: str = Form("")):
+    con = _con()
+    con.execute("INSERT OR REPLACE INTO spotcheck VALUES (?,?,?,?)",
+                (item_id, verdict, corrected or None, dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")))
+    con.commit()
+    return RedirectResponse(f"/spotcheck#{item_id}", status_code=303)
