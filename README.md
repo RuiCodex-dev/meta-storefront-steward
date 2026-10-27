@@ -40,14 +40,33 @@ to three apps; no single-app console shows that.
 | Muse Spark Open (open weights) | Baseten | held-out test-set generator (a different model than the training-data writer), guided baseline |
 | Muse Image 1.0 | Meta Model API | store-screenshot scenes, never the interface |
 | SAM 3.1 | Meta Model API | finds the phone screen in the generated scene |
-| Muse Glimmer 30B (open weights, Apache-2.0) | this PC, llama.cpp, official Q4_K_M GGUF | private, local triage tier |
-| Llama 3.2 3B-Instruct (open weights) | this PC, QLoRA on an 8 GB RTX 4070 laptop GPU | student distilled from the Spark teacher |
+| Muse Glimmer 30B (open weights, Apache-2.0) | one H100 on Modal (4-bit NF4, QLoRA); runs locally from the official GGUF with llama.cpp | the distilled triage student: teacher quality at a fifth of the cost |
+| Llama 3.2 3B-Instruct (open weights) | one A10G on Modal (4-bit NF4, QLoRA) | the smallest student, for the cheapest always-on triage |
 
 Contributor mode is never used; the budget guard refuses `-contributor` model ids.
 
 ## Evaluation
 
-See [`results/EVAL.md`](results/EVAL.md) (regenerate with `python scripts/run_eval.py --api`). Two test sets, never mixed:
+**Distillation result.** Muse Spark 1.3 labelled 2,754 synthetic training reviews; QLoRA (rank 16, 2 epochs, 345 steps)
+distilled that into two open-weight students. Macro-F1 with 95% bootstrap intervals:
+
+| System | Held-out synthetic (n=591) | Real reviews (n=49) | Actionable recall (real) | $ per 1k reviews | ms per review |
+|---|---|---|---|---|---|
+| Keyword rules (floor) | 0.574 [0.540, 0.605] | 0.402 [0.153, 0.463] | 0.83 | 0 | 0.1 |
+| Muse Spark 1.3, guided (the teacher) | 0.991 [0.982, 0.998] | 0.776 [0.331, 0.833] | 1.00 | 0.656 | 544 |
+| Muse Spark Open, guided (Baseten) | 0.995 [0.988, 1.000] | 0.787 [0.428, 1.000] | 1.00 | 1.188 | 645 |
+| Muse Glimmer 30B, no tuning | 0.956 [0.939, 0.972] | 0.718 [0.329, 0.833] | 1.00 | 0.802 | 731 |
+| **Muse Glimmer 30B + QLoRA student** | **0.993 [0.986, 0.998]** | 0.913 [0.394, 1.000] | 1.00 | **0.134** | **122** |
+| Llama 3.2 3B, no tuning | 0.694 [0.656, 0.729] | 0.331 [0.152, 0.400] | 1.00 | 0.020 | 66 |
+| **Llama 3.2 3B + QLoRA student** | **0.987 [0.976, 0.995]** | 0.714 [0.325, 0.774] | 1.00 | **0.026** | 84 |
+
+The Glimmer student matches its teacher on the held-out set at about a fifth of the cost and 4.5x the speed, and fine-tuning
+lifts the 3B model from 0.69 to 0.99. On the real reviews every system that is not the keyword floor flags every
+review that needs action; the real-set F1 intervals overlap heavily (n=49, mostly praise), so no ranking is claimed
+there. Hosted costs come from the receipts table; GPU costs are evaluation GPU-minutes x Modal list price (H100
+$3.95/h, A10G $1.10/h), batched. Latency is amortised batch time per review, not time to first token.
+
+Full table: [`results/EVAL.md`](results/EVAL.md) (regenerate with `python scripts/run_eval.py --api`). Two test sets, never mixed:
 
 * **Real:** all 49 written reviews of the in-scope apps. With n=49 and a heavy praise majority the intervals are wide,
   and that is reported, not hidden. The number that matters here is **actionable recall**: did the system flag every
@@ -86,6 +105,9 @@ python -c "from steward.connectors import ingest; print(ingest.run_all())"   # r
 python -c "from steward import agent; print(agent.run()['report'])"         # one morning pass
 python -m uvicorn steward.web.app:app --port 8765                            # UI, dry-run by default
 python -m pytest -q tests
+# students (Modal, paid from the hackathon credit): weights are downloaded from the official repos at run time
+python students/modal_glimmer.py --stage all
+python students/modal_llama.py
 ```
 
 Spend is capped in code before every call (Meta Model API USD 140, Baseten USD 90) and logged in `ops/USAGE_LOG.md`.

@@ -42,7 +42,7 @@ def run(stage: str, system: str, train_rows: list, test_sets: dict, cfg: dict) -
     import subprocess
     import torch
     from huggingface_hub import snapshot_download
-    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+    from transformers import AutoTokenizer, BitsAndBytesConfig, MuseGlimmerForConditionalGeneration
 
     t_start = time.time()
     log = {"gpu": subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader"],
@@ -56,7 +56,8 @@ def run(stage: str, system: str, train_rows: list, test_sets: dict, cfg: dict) -
         tok.pad_token = tok.eos_token
     q = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.bfloat16,
                            bnb_4bit_use_double_quant=True, bnb_4bit_quant_storage=torch.bfloat16)
-    model = AutoModelForCausalLM.from_pretrained(path, quantization_config=q, dtype=torch.bfloat16, device_map="auto")
+    model = MuseGlimmerForConditionalGeneration.from_pretrained(path, quantization_config=q, dtype=torch.bfloat16,
+                                                               device_map="auto")
     log["load_min"] = round((time.time() - t_start) / 60, 1)
 
     def msgs(text):
@@ -98,7 +99,8 @@ def run(stage: str, system: str, train_rows: list, test_sets: dict, cfg: dict) -
         model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=True)
         model = get_peft_model(model, LoraConfig(r=16, lora_alpha=32, lora_dropout=0.05, bias="none",
                                                  task_type="CAUSAL_LM",
-                                                 target_modules=["q_proj", "k_proj", "v_proj", "o_proj"]))
+                                                 # language-model attention only; the vision tower is untouched
+                                                 target_modules=r"^(?!.*vision).*\.(q_proj|k_proj|v_proj|o_proj)$"))
         data = []
         for r in train_rows:
             p = prompt(r["text"])

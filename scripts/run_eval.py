@@ -7,10 +7,10 @@ Systems:
   spark13_zeroshot      Muse Spark 1.3, category list only
   spark13_guided        Muse Spark 1.3 with the label guide + 12 worked examples (= the teacher)
   sparkopen_guided      Muse Spark Open (open weights, served by Baseten), same prompt as the teacher
-  llama3b_base          Llama 3.2 3B-Instruct, no fine-tuning, local GPU
-  llama3b_student       Llama 3.2 3B-Instruct + QLoRA distilled from the teacher, local GPU
-  glimmer_base          Muse Glimmer 30B (official Q4_K_M GGUF), no fine-tuning, local
-  glimmer_student       Muse Glimmer 30B + LoRA distilled from the teacher, local
+  llama3b_base          Llama 3.2 3B-Instruct, no fine-tuning, 4-bit NF4 on one A10G (Modal)
+  llama3b_student       Llama 3.2 3B-Instruct + QLoRA distilled from the teacher, 4-bit NF4 on one A10G (Modal)
+  glimmer_base          Muse Glimmer 30B, no fine-tuning, 4-bit NF4 on one H100 (Modal)
+  glimmer_student       Muse Glimmer 30B + QLoRA distilled from the teacher, 4-bit NF4 on one H100 (Modal)
 Writes results/eval.json and results/EVAL.md (aggregates only, no review text).
 """
 import datetime as dt
@@ -29,10 +29,10 @@ SYSTEMS = [
     ("spark13_zeroshot", "Muse Spark 1.3, zero-shot", "Meta Model API", "category names only"),
     ("spark13_guided", "Muse Spark 1.3, guided (teacher)", "Meta Model API", "label guide + 12 examples"),
     ("sparkopen_guided", "Muse Spark Open, guided", "Baseten (open weights)", "same prompt as the teacher"),
-    ("llama3b_base", "Llama 3.2 3B, no tuning", "local RTX 4070 8 GB", "student prompt, no training"),
-    ("llama3b_student", "Llama 3.2 3B + QLoRA student", "local RTX 4070 8 GB", "distilled from the teacher"),
-    ("glimmer_base", "Muse Glimmer 30B, no tuning", "local, llama.cpp Q4_K_M", "student prompt, no training"),
-    ("glimmer_student", "Muse Glimmer 30B + LoRA student", "local, llama.cpp Q4_K_M", "distilled from the teacher"),
+    ("llama3b_base", "Llama 3.2 3B, no tuning", "Modal A10G, 4-bit (open weights)", "student prompt, no training"),
+    ("llama3b_student", "Llama 3.2 3B + QLoRA student", "Modal A10G, 4-bit (open weights)", "distilled from the teacher"),
+    ("glimmer_base", "Muse Glimmer 30B, no tuning", "Modal H100, 4-bit (open weights)", "student prompt, thinks before answering"),
+    ("glimmer_student", "Muse Glimmer 30B + QLoRA student", "Modal H100, 4-bit (open weights)", "distilled from the teacher, answers directly"),
 ]
 API = {"spark13_zeroshot": ("meta", "muse-spark-1.3", "zeroshot"),
        "spark13_guided": ("meta", "muse-spark-1.3", "guided"),
@@ -95,6 +95,18 @@ def cost_latency(con, sysname, n_items_total):
         return None, None
     if sysname == "rules":
         return 0.0, 0.1
+    # GPU-hosted open weights: GPU minutes spent on evaluation x Modal list price (modal.com/pricing, 2026-10-28)
+    gpu = {"glimmer": ("glimmer_train_log.json", 0.001097 * 60), "llama3b": ("llama3b_train_log.json", 0.000306 * 60)}
+    fam, kind = sysname.split("_")
+    logf, usd_per_min = gpu[fam]
+    lp = config.DATA / "students" / logf
+    if lp.exists():
+        lg = json.loads(lp.read_text(encoding="utf-8"))
+        mins = lg.get("base_eval_min" if kind == "base" else "student_eval_min")
+        if mins:
+            usd = round(1000 * mins * usd_per_min / n_items_total, 3)
+            ms = round(60000 * mins / n_items_total, 1)    # amortised wall time per review, batched
+            return usd, ms
     ms = []
     for split in SPLITS.values():
         f = config.DATA / "students" / f"pred_{FILES[sysname]}_{split}.jsonl"
