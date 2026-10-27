@@ -7,3 +7,4 @@ dev.meta.ai Usage and Billing pages plus our own receipts table.
 | Date (CET) | Credits shown on Billing | Spend today | Spend to date | Calls | Note |
 |---|---|---|---|---|---|
 | 2026-10-26 | **$150.00 free credits in use** (seen 16:45 UTC) | $0.00 | $0.00 | 0 | claim filed 16:22 UTC; card added by the owner; balance EUR 0.00; no API call made |
+| 2026-10-27 (to 09:45 CET) | $150 in use | $5.81 | $5.81 | 557 | Baseten $8.23 of $90 cap (416 calls); synthetic data, teacher labels, baselines, clustering, drafts, agent, Muse Image + SAM |
