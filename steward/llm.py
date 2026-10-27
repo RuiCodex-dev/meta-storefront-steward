@@ -78,12 +78,13 @@ class Result:
     latency_ms: int
     model: str
     provider: str
+    message: Any = None          # raw assistant message (carries tool_calls for the agent loop)
 
 
 def chat(provider: str, model: str, messages: list[dict], *, purpose: str, max_tokens: int = 1024,
          schema: dict | None = None, schema_name: str = "out", temperature: float | None = 0.0,
          reasoning_effort: str | None = None,
-         con=None, extra: dict | None = None) -> Result:
+         con=None, extra: dict | None = None, tools: list[dict] | None = None) -> Result:
     con = con or db.connect()
     # 1. outbound privacy gate
     for t in _texts(messages):
@@ -104,6 +105,8 @@ def chat(provider: str, model: str, messages: list[dict], *, purpose: str, max_t
         kw["reasoning_effort"] = reasoning_effort
     if extra:
         kw.update(extra)
+    if tools:
+        kw["tools"] = tools
     t0 = time.time()
     try:
         resp = client(provider).chat.completions.create(**kw)
@@ -122,9 +125,10 @@ def chat(provider: str, model: str, messages: list[dict], *, purpose: str, max_t
                          output_tokens=getattr(u, "completion_tokens", 0) or 0)
     choice = resp.choices[0]
     text = choice.message.content or ""
-    status = "ok" if text else f"empty({choice.finish_reason})"
+    has_tools = bool(getattr(choice.message, "tool_calls", None))
+    status = "ok" if (text or has_tools) else f"empty({choice.finish_reason})"
     usd = budget.record(con, provider, model, purpose, usage, ms, prompt_text, status=status)
-    if not text:
+    if not text and not has_tools:
         # Reasoning tokens count against max_tokens; a 'length' stop with no content means the
         # budget was spent thinking. Say so instead of failing inside json.loads.
         raise TruncatedOutput(f"{provider}/{model}: no content (finish_reason={choice.finish_reason}, "
@@ -132,7 +136,8 @@ def chat(provider: str, model: str, messages: list[dict], *, purpose: str, max_t
     data = None
     if schema is not None:
         data = json.loads(_strip_fences(text))
-    return Result(text=text, data=data, usage=usage, cost_usd=usd, latency_ms=ms, model=model, provider=provider)
+    return Result(text=text, data=data, usage=usage, cost_usd=usd, latency_ms=ms, model=model, provider=provider,
+                  message=choice.message)
 
 
 def spend_report(con=None) -> dict:

@@ -12,6 +12,7 @@
   <nav>
     {% set p = request.url.path %}
     <a href="/" class="{{ 'on' if p == '/' }}">Overview</a>
+    <a href="/agent" class="{{ 'on' if p.startswith('/agent') }}">Agent</a>
     <a href="/inbox" class="{{ 'on' if p.startswith('/inbox') }}">Inbox</a>
     <a href="/board" class="{{ 'on' if p.startswith('/board') }}">Issue board</a>
     <a href="/queue" class="{{ 'on' if p.startswith('/queue') }}">Approval queue</a>

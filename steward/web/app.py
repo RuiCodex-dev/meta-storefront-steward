@@ -91,6 +91,10 @@ def board(request: Request):
                 ",".join("?" * len(json.loads(c["item_ids"]))), json.loads(c["item_ids"]))] if json.loads(
                 c["item_ids"]) else []
             d["crash_n"] = len(json.loads(c["crash_issue_ids"]))
+            from ..reason import _crash_key
+            keys = set(json.loads(c["crash_issue_ids"]))
+            d["crashes"] = [dict(x) for x in con.execute("SELECT * FROM crash_issues")
+                            if _crash_key(x["package"], x["issue_id"]) in keys]
             clusters.append(d)
     return T.TemplateResponse(request, "board.html", {"clusters": clusters, "run": run[0] if run else None})
 
@@ -134,3 +138,21 @@ def receipts(request: Request):
         "rows": budget.summary(con),
         "spend": {p: (round(budget.spent(con, p), 4), budget.CAPS_USD[p]) for p in ("meta", "baseten")},
         "recent": con.execute("SELECT * FROM receipts ORDER BY id DESC LIMIT 30").fetchall()})
+
+
+@app.get("/agent", response_class=HTMLResponse)
+def agent_page(request: Request):
+    con = _con()
+    con.execute("CREATE TABLE IF NOT EXISTS agent_steps (run_id TEXT, step INTEGER, ts TEXT, tool TEXT, args TEXT, "
+                "result TEXT, cost_usd REAL)")
+    runs = [r[0] for r in con.execute("SELECT DISTINCT run_id FROM agent_steps ORDER BY run_id DESC LIMIT 10")]
+    steps = {r: [dict(x) for x in con.execute("SELECT * FROM agent_steps WHERE run_id=? ORDER BY step, rowid",
+                                              (r,))] for r in runs}
+    return T.TemplateResponse(request, "agent.html", {"runs": runs, "steps": steps})
+
+
+@app.post("/agent/run")
+def agent_run():
+    from .. import agent
+    agent.run()
+    return RedirectResponse("/agent", status_code=303)

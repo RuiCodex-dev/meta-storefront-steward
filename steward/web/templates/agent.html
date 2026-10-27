@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Agent runs</h1>
+<p class="lede">Muse Spark plans the developer's morning pass and calls the steward's own tools: overview, store
+sync, triage, whole-studio issue grouping, reply drafting. Posting to a store is not one of its tools; drafts wait
+in the approval queue. Every step and its cost is recorded here.</p>
+<form method="post" action="/agent/run"><button class="primary">Run the morning pass now</button></form>
+{% for r in runs %}
+<h2>Run <span class="pid">{{ r }}</span></h2>
+<table><tr><th>Step</th><th>Tool</th><th>Arguments</th><th>Result</th><th>USD</th></tr>
+{% for s in steps[r] %}
+{% if s.tool == 'report' %}
+<tr><td></td><td><b>Report</b></td><td colspan="3" style="white-space: pre-wrap">{{ s.result }}</td></tr>
+{% else %}
+<tr><td class="num">{{ s.step }}</td><td><span class="chip">{{ s.tool }}</span></td><td class="pid">{{ s.args }}</td>
+<td class="small" style="max-width:560px; overflow-wrap:anywhere">{{ s.result[:400] }}{% if s.result|length > 400 %}…{% endif %}</td>
+<td class="num">{{ '%.4f' % (s.cost_usd or 0) }}</td></tr>
+{% endif %}
+{% endfor %}
+</table>
+{% endfor %}
+{% endblock %}

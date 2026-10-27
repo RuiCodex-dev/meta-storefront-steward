@@ -124,8 +124,14 @@ def verify_clusters(clusters: list[dict], index: dict) -> list[dict]:
         if not rids and not cids:
             problems.append("cluster cites nothing that exists; dropped")
             continue
+        fsv = c.get("first_seen_version") or "unknown"
+        if fsv == "unknown" and cids:
+            # deterministic, from Play vitals: the lowest versionCode any cited crash issue was first seen in
+            codes = [index["crashes"][x]["first_version"] for x in cids if index["crashes"][x]["first_version"]]
+            if codes:
+                fsv = f"versionCode {min(codes)} (from crash data)"
         c2 = dict(c, review_ids=rids, crash_ids=cids, evidence=ev, links=links, problems=problems,
-                  verified=not problems)
+                  verified=not problems, first_seen_version=fsv)
         out.append(c2)
     return out
 

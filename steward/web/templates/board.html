@@ -16,6 +16,10 @@ before it reached this page. Run <span class="pid">{{ run }}</span>.</p>
     <div class="quote">{% if src %}{{ src.text | highlight(e.quote) }}{% endif %}
     <div class="pid">{{ e.id }} · {{ src.lang if src else '' }}</div></div>
   {% endfor %}
+  {% if c.crashes %}<table style="margin:8px 0"><tr><th>App</th><th>Type</th><th>Cause</th><th>Users</th><th>Versions</th></tr>
+  {% for x in c.crashes %}<tr><td class="small">{{ x.package | short }}</td><td class="small">{{ x.type }}</td>
+  <td class="pid" style="overflow-wrap:anywhere">{{ (x.cause or '')[:110] }}</td><td class="num">{{ x.distinct_users }}</td>
+  <td class="num small">{{ x.first_version }}–{{ x.last_version }}</td></tr>{% endfor %}</table>{% endif %}
   {% if c.ev.links %}<div class="small muted">Review-to-crash links: {% for l in c.ev.links %}{{ l.review }} → {{ l.crash }} ({{ l.rule }}){% if not loop.last %}; {% endif %}{% endfor %}</div>{% endif %}
   {% if c.ev.problems %}<div class="small bad">Verifier removed: {{ c.ev.problems | join('; ') }}</div>{% endif %}
   <div class="action"><b>Next action:</b> {{ c.ev.action }}</div>
