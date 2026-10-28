@@ -197,3 +197,29 @@ def spotcheck_save(item_id: str, verdict: str = Form(...), corrected: str = Form
                 (item_id, verdict, corrected or None, dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")))
     con.commit()
     return RedirectResponse(f"/spotcheck#{item_id}", status_code=303)
+
+
+# ------------------------------------------------------------------ live try-it: scrub, then triage locally
+@app.get("/try", response_class=HTMLResponse)
+def try_page(request: Request):
+    from .. import student
+    return T.TemplateResponse(request, "try.html", {"result": None, "local": student.available()})
+
+
+@app.post("/try", response_class=HTMLResponse)
+def try_run(request: Request, text: str = Form(...)):
+    import time as _t
+    from .. import student, triage
+    from ..privacy import scrub
+    clean, hits = scrub(text)
+    local = student.available()
+    t0 = _t.time()
+    if local:
+        lab = student.classify(clean)
+        engine = "Muse Glimmer 30B student, on this PC (llama.cpp, no network)"
+    else:
+        lab = next(iter(triage.label_items("meta", "muse-spark-1.3", [{"id": "try", "text": clean}],
+                                           purpose="try-it").values()))
+        engine = "Muse Spark 1.3 teacher (hosted)"
+    res = {"clean": clean, "hits": hits, "label": lab, "engine": engine, "ms": round((_t.time() - t0) * 1000)}
+    return T.TemplateResponse(request, "try.html", {"result": res, "local": local, "text": text})

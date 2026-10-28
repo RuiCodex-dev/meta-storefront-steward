@@ -99,19 +99,20 @@ def t_triage_untriaged(con) -> dict:
     if not rows:
         return {"triaged": 0, "note": "nothing untriaged"}
     items = [{"id": r["id"], "text": r["text"]} for r in rows]
-    local = os.environ.get("STEWARD_LOCAL_URL")
-    engine = "muse-spark-1.3 guided"
-    labels = {}
-    if local:
-        try:
-            httpx.get(local.rsplit("/v1", 1)[0] + "/health", timeout=3).raise_for_status()
-            labels = triage.label_items("local", "local", items, mode="guided", batch=5, workers=1,
-                                        purpose="agent-triage-local")
-            engine = "local open-weights model"
-        except Exception:  # noqa: BLE001 - fall back to the hosted teacher
-            labels = {}
-    if not labels:
-        labels = triage.label_items(*MODEL, items, mode="guided", purpose="agent-triage")
+    from . import student
+    engine, labels = "muse-spark-1.3 guided (hosted teacher)", {}
+    if student.available():
+        engine = "Muse Glimmer 30B student on this PC (llama.cpp)"
+        for it in items:
+            try:
+                p = student.classify(it["text"])
+                labels[it["id"]] = {"category": p["category"], "severity": p["severity"],
+                                    "language": p.get("language") or "", "gloss_en": ""}
+            except Exception:  # noqa: BLE001 - leave it for the hosted teacher below
+                pass
+    rest = [it for it in items if it["id"] not in labels]
+    if rest:
+        labels.update(triage.label_items(*MODEL, rest, mode="guided", purpose="agent-triage"))
     now = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     for iid, lab in labels.items():
         con.execute("INSERT OR REPLACE INTO labels VALUES (?,?,?,?,?,?,?,?)",
