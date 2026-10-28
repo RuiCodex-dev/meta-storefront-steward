@@ -1,0 +1,7 @@
+{
+ "n": 49,
+ "category_agreement_with_modal_student": 47,
+ "median_ms_cpu": 14034,
+ "p90_ms_cpu": 23896,
+ "setup": "llama.cpp b11909, official Muse-Glimmer-30B Q4_K_M GGUF + our LoRA GGUF, CPU only (i9-13900H, 8 threads), shared machine"
+}

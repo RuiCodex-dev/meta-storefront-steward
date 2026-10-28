@@ -66,6 +66,12 @@ review that needs action; the real-set F1 intervals overlap heavily (n=49, mostl
 there. Hosted costs come from the receipts table; GPU costs are evaluation GPU-minutes x Modal list price (H100
 $3.95/h, A10G $1.10/h), batched. Latency is amortised batch time per review, not time to first token.
 
+**On our own hardware.** The Glimmer student's LoRA is converted to a llama.cpp adapter (`students/lora_to_gguf.py`) and
+applied at run time to Meta's official `Muse-Glimmer-30B` Q4_K_M GGUF. On this studio's laptop (CPU only, no network)
+it agreed with the H100 student on **47 of 49** real reviews, parsed 49 of 49, and took 14 s per review (median),
+which is enough for a studio that receives a few reviews a week ([`results/local_student_check.json`](results/local_student_check.json)).
+The agent's triage tool and the *Try it* page use this local student first and fall back to the hosted teacher.
+
 Full table: [`results/EVAL.md`](results/EVAL.md) (regenerate with `python scripts/run_eval.py --api`). Two test sets, never mixed:
 
 * **Real:** all 49 written reviews of the in-scope apps. With n=49 and a heavy praise majority the intervals are wide,
