@@ -22,7 +22,17 @@ Fixed in dff403d: *Try it* now shows the scrubbed text and says that no triage m
 file raises a clear `MissingKey` error; the spot-check page explains why it is empty on the demo database. A
 regression test was added (43 tests).
 
-## Rehearsal 2
+## Rehearsal 2 - 2026-10-29, commit 2697d29
 
-Planned: a fresh clone at the latest commit, the same click-through, plus one live agent pass on the demo database
-with the Meta key (about $0.50).
+| Check | Result |
+|---|---|
+| Clone + venv + install | 30 s, no errors |
+| `pytest` (no keys) | 44 passed |
+| `python scripts/run_demo.py` (with the Meta key) | server up |
+| 8 pages | all HTTP 200, **0 browser console errors, 0 server errors** |
+| Approve reply -> Post (dry run) | OK |
+| Approve ticket -> Export | OK |
+| *Try it* (live, Muse Spark) | OK; the e-mail in the text was replaced by `[EMAIL]` before the call |
+| Live agent pass on the demo database | completed; report lists new / quiet issues against the recorded pass |
+
+Spend of this rehearsal (live pass and *Try it*): $0.33, merged into the main receipts ledger.
