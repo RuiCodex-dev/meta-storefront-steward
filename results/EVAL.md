@@ -1,6 +1,6 @@
 # Triage evaluation
 
-Generated 2026-10-27T23:48:17+00:00. Gold = Claude labels (owner spot check recorded separately). Macro-F1 over the categories present in each test set, 95% percentile bootstrap (2,000 resamples, seed 20261027).
+Generated 2026-10-27T23:48:17+00:00. Gold = Claude labels (AI labels; independent second-model review, not human: results/spotcheck.json). Macro-F1 over the categories present in each test set, 95% percentile bootstrap (2,000 resamples, seed 20261027).
 
 Test sets: real = all 49 written reviews of the included apps; held-out synthetic = 591 reviews written by Muse Spark Open (the training pool was written by Muse Spark 1.3).
 Gold hashes: real `540c0d4a48c05a2b`, synthetic `6d5b5d9fe929ee91`.

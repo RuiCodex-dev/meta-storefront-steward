@@ -19,6 +19,7 @@ DEMO = os.environ.get("STEWARD_DEMO") == "1"     # demo database: synthetic revi
 KEYS_DIR = Path(os.environ.get("STEWARD_KEYS", Path.home() / ".ruicodex-keys"))
 META_KEY_FILE = KEYS_DIR / "storefront-steward" / "meta.json"
 BASETEN_KEY_FILE = KEYS_DIR / "baseten.json"
+ANTHROPIC_KEY_FILE = KEYS_DIR / "anthropic-site-chat.json"   # Rui Codex's own API credit
 PSEUDONYM_KEY_FILE = KEYS_DIR / "storefront-steward" / "pseudonym.key"
 PLAY_SERVICE_ACCOUNT = Path(os.environ.get(
     "STEWARD_PLAY_SA",
@@ -42,6 +43,10 @@ def _read_json(path: Path) -> dict:
 
 def meta_api_key() -> str:
     return _read_json(META_KEY_FILE)["api_key"]
+
+
+def anthropic_api_key() -> str:
+    return _read_json(ANTHROPIC_KEY_FILE)["api_key"]
 
 
 def baseten_api_key() -> str:

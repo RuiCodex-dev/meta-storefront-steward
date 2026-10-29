@@ -1,4 +1,7 @@
-"""Summarise the owner's spot check of the Claude gold labels. Writes counts only (no review text) to results/."""
+"""Summarise the owner's own spot check of the gold labels (if he does it). Counts only, to results/spotcheck_owner.json.
+
+The 29 Oct check was NOT done by a person: see scripts/independent_review.py and results/spotcheck.json.
+"""
 from __future__ import annotations
 
 import json
@@ -35,7 +38,7 @@ def main() -> dict:
             k = f"{gold} -> {row[1] or gold + ' (severity)'}"
             out["corrections"][k] = out["corrections"].get(k, 0) + 1
     out["agreement"] = round(out["agree"] / out["checked"], 3) if out["checked"] else None
-    (ROOT / "results" / "spotcheck.json").write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8", newline="\n")
+    (ROOT / "results" / "spotcheck_owner.json").write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(json.dumps(out, indent=2))
     return out
 

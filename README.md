@@ -89,8 +89,15 @@ Full table: [`results/EVAL.md`](results/EVAL.md) (regenerate with `python script
   removed before labelling. This set is clear-cut by construction (frontier models score about 0.99 on it), so it
   mainly separates the small students; it is not a claim about real-world difficulty.
 
-Gold labels are Claude labels, assigned **blind** (without the generator's intended label), spot-checked by the
-developer; the agreement of the blind labels with the generator's intended labels was 99.2%. Gold hashes are written
+Gold labels are AI labels (Claude), assigned **blind** (without the generator's intended label); the agreement of the
+blind labels with the generator's intended labels was 99.2%. **AI-labelled; an independent second-model review agreed
+on 50 of 50** spot-check cards (every actionable real review, 14 real praise reviews, 30 held-out synthetic). The
+reviewer was Claude Opus 5.5 with its own prompt: it relabelled each card blind and agreement was computed in code
+(same category, severity within one level; exact severity 47 of 50). **No human checked these labels.** Because the
+gold labeller and the reviewer are both Claude models, the Meta models' own labels on the same cards are a
+cross-family control: Muse Spark 1.3 agrees on 49 of 50, Muse Spark Open on 46 of 46. The one disagreement is a
+review mixing lost data with a paid-feature complaint (billing or bug). Details:
+[`results/spotcheck.json`](results/spotcheck.json). Gold hashes are written
 into `results/eval.json`. Every score has n and a 95% bootstrap interval (2,000 resamples, fixed seed). Costs and
 latencies come from the receipts table.
 

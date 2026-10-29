@@ -19,7 +19,7 @@ import sqlite3
 import threading
 from dataclasses import dataclass
 
-CAPS_USD = {"meta": 140.0, "baseten": 90.0, "local": float("inf")}
+CAPS_USD = {"meta": 140.0, "baseten": 90.0, "anthropic": 5.0, "local": float("inf")}  # anthropic: independent label review only
 
 # USD per 1M tokens: (input, cached input, output)
 TOKEN_PRICES = {
@@ -28,6 +28,7 @@ TOKEN_PRICES = {
     ("meta", "muse-spark-1.1"): (1.25, 0.15, 4.25),
     ("meta", "muse-wonder-1.0"): (4.00, 0.20, 20.00),
     ("baseten", "meta-models/muse-spark-open-1026"): (1.25, 0.15, 4.25),
+    ("anthropic", "claude-opus-5-5"): (4.00, 0.20, 20.00),
     ("local", "*"): (0.0, 0.0, 0.0),
 }
 PER_IMAGE = {("meta", "muse-image-1.0"): 0.01, ("meta", "sam-3.1"): 2.50 / 1000}

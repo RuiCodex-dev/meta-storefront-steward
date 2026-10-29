@@ -148,7 +148,7 @@ def main():
     res.mkdir(exist_ok=True)
     (res / "eval.json").write_text(json.dumps(out, indent=1), encoding="utf-8", newline="\n")
     lines = ["# Triage evaluation", "", f"Generated {out['generated']}. Gold = Claude labels "
-             "(owner spot check recorded separately). Macro-F1 over the categories present in each test set, "
+             "(AI labels; independent second-model review, not human: results/spotcheck.json). Macro-F1 over the categories present in each test set, "
              "95% percentile bootstrap (2,000 resamples, seed 20261027).", "",
              f"Test sets: real = all {out['n_real']} written reviews of the included apps; held-out synthetic = "
              f"{out['n_synth']} reviews written by Muse Spark Open (the training pool was written by Muse Spark 1.3).",

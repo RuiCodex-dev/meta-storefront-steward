@@ -1,0 +1,695 @@
+{
+ "reviewer": "independent AI review (not human)",
+ "model": "claude-opus-5-5",
+ "method": "blind relabel with its own prompt; agreement computed in code",
+ "agreement_rule": "same category and severity within one level",
+ "generated": "2026-10-29T17:28:20+00:00",
+ "sample": 50,
+ "reviewed": 50,
+ "errors": 0,
+ "agreed": 50,
+ "category_agreed": 50,
+ "exact_agreed": 47,
+ "by_set": {
+  "real": {
+   "n": 20,
+   "agreed": 20,
+   "category_agreed": 20
+  },
+  "synthetic": {
+   "n": 30,
+   "agreed": 30,
+   "category_agreed": 30
+  }
+ },
+ "cost_usd": 0.2547,
+ "disagreements": [],
+ "severity_one_level_apart": [
+  {
+   "item_id": "R-2a0e029ef0",
+   "set": "real",
+   "gold": {
+    "category": "ads",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "ads",
+    "severity": 2
+   },
+   "note": "User complains that an advertisement appeared immediately in the first menu."
+  },
+  {
+   "item_id": "R-860acef073",
+   "set": "real",
+   "gold": {
+    "category": "ads",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "ads",
+    "severity": 2
+   },
+   "note": "User complains about excessive ad volume throughout the app."
+  },
+  {
+   "item_id": "R-b2d90bb719",
+   "set": "real",
+   "gold": {
+    "category": "ads",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "ads",
+    "severity": 2
+   },
+   "note": "User complains about frequent forced ads appearing after button presses."
+  }
+ ],
+ "error_items": [],
+ "cross_family_control": {
+  "Muse Spark 1.3, guided (teacher prompt)": {
+   "n": 50,
+   "agreed": 49,
+   "disagreements": [
+    {
+     "item_id": "R-6a5e26c2db",
+     "gold": {
+      "category": "billing",
+      "severity": 3
+     },
+     "model": {
+      "category": "bug",
+      "severity": 3
+     }
+    }
+   ]
+  },
+  "Muse Spark Open, guided (Baseten)": {
+   "n": 46,
+   "agreed": 46,
+   "disagreements": []
+  }
+ },
+ "items": [
+  {
+   "item_id": "R-2a0e029ef0",
+   "set": "real",
+   "gold": {
+    "category": "ads",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "ads",
+    "severity": 2
+   }
+  },
+  {
+   "item_id": "R-4baa2f7931",
+   "set": "real",
+   "gold": {
+    "category": "feature_request",
+    "severity": 2
+   },
+   "reviewer": {
+    "category": "feature_request",
+    "severity": 2
+   }
+  },
+  {
+   "item_id": "R-6a5e26c2db",
+   "set": "real",
+   "gold": {
+    "category": "billing",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "billing",
+    "severity": 3
+   }
+  },
+  {
+   "item_id": "R-6d4bfb2f07",
+   "set": "real",
+   "gold": {
+    "category": "performance",
+    "severity": 2
+   },
+   "reviewer": {
+    "category": "performance",
+    "severity": 2
+   }
+  },
+  {
+   "item_id": "R-860acef073",
+   "set": "real",
+   "gold": {
+    "category": "ads",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "ads",
+    "severity": 2
+   }
+  },
+  {
+   "item_id": "R-b2d90bb719",
+   "set": "real",
+   "gold": {
+    "category": "ads",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "ads",
+    "severity": 2
+   }
+  },
+  {
+   "item_id": "R-e04066d773",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-be4edb4f12",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-58c0470dc9",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-9759854f5b",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-c40405e36b",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-76982bd9f9",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-3fde0e7e0d",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-ee9959f1ea",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-b6a1ca56de",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-19a6cf4766",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-74a455d2c3",
+   "set": "real",
+   "gold": {
+    "category": "spam_or_offtopic",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "spam_or_offtopic",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-70361459f7",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-0f64f4b113",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "R-49de909fc8",
+   "set": "real",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "S-6a3cd1e979",
+   "set": "synthetic",
+   "gold": {
+    "category": "bug",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "bug",
+    "severity": 3
+   }
+  },
+  {
+   "item_id": "S-de0c2c2998",
+   "set": "synthetic",
+   "gold": {
+    "category": "bug",
+    "severity": 2
+   },
+   "reviewer": {
+    "category": "bug",
+    "severity": 2
+   }
+  },
+  {
+   "item_id": "S-3a4c349634",
+   "set": "synthetic",
+   "gold": {
+    "category": "spam_or_offtopic",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "spam_or_offtopic",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "S-72f6c16999",
+   "set": "synthetic",
+   "gold": {
+    "category": "feature_request",
+    "severity": 2
+   },
+   "reviewer": {
+    "category": "feature_request",
+    "severity": 2
+   }
+  },
+  {
+   "item_id": "S-9e305e1ba3",
+   "set": "synthetic",
+   "gold": {
+    "category": "spam_or_offtopic",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "spam_or_offtopic",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "S-2d06232601",
+   "set": "synthetic",
+   "gold": {
+    "category": "performance",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "performance",
+    "severity": 3
+   }
+  },
+  {
+   "item_id": "S-6ff4a86ec6",
+   "set": "synthetic",
+   "gold": {
+    "category": "performance",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "performance",
+    "severity": 3
+   }
+  },
+  {
+   "item_id": "S-21d7709a8b",
+   "set": "synthetic",
+   "gold": {
+    "category": "ads",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "ads",
+    "severity": 3
+   }
+  },
+  {
+   "item_id": "S-891f85c545",
+   "set": "synthetic",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "S-7d22841a4e",
+   "set": "synthetic",
+   "gold": {
+    "category": "spam_or_offtopic",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "spam_or_offtopic",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "S-5b4c61212e",
+   "set": "synthetic",
+   "gold": {
+    "category": "ads",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "ads",
+    "severity": 3
+   }
+  },
+  {
+   "item_id": "S-c02d6a0fd6",
+   "set": "synthetic",
+   "gold": {
+    "category": "billing",
+    "severity": 4
+   },
+   "reviewer": {
+    "category": "billing",
+    "severity": 4
+   }
+  },
+  {
+   "item_id": "S-ad01c576ae",
+   "set": "synthetic",
+   "gold": {
+    "category": "bug",
+    "severity": 2
+   },
+   "reviewer": {
+    "category": "bug",
+    "severity": 2
+   }
+  },
+  {
+   "item_id": "S-5cd6e50e78",
+   "set": "synthetic",
+   "gold": {
+    "category": "spam_or_offtopic",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "spam_or_offtopic",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "S-5bfd45f616",
+   "set": "synthetic",
+   "gold": {
+    "category": "performance",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "performance",
+    "severity": 3
+   }
+  },
+  {
+   "item_id": "S-e72c590c87",
+   "set": "synthetic",
+   "gold": {
+    "category": "ux_confusion",
+    "severity": 2
+   },
+   "reviewer": {
+    "category": "ux_confusion",
+    "severity": 2
+   }
+  },
+  {
+   "item_id": "S-e0ad2fd65e",
+   "set": "synthetic",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "S-346fb08f44",
+   "set": "synthetic",
+   "gold": {
+    "category": "bug",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "bug",
+    "severity": 3
+   }
+  },
+  {
+   "item_id": "S-2bfad84fa6",
+   "set": "synthetic",
+   "gold": {
+    "category": "billing",
+    "severity": 4
+   },
+   "reviewer": {
+    "category": "billing",
+    "severity": 4
+   }
+  },
+  {
+   "item_id": "S-5683eb969a",
+   "set": "synthetic",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "S-870d151764",
+   "set": "synthetic",
+   "gold": {
+    "category": "billing",
+    "severity": 4
+   },
+   "reviewer": {
+    "category": "billing",
+    "severity": 4
+   }
+  },
+  {
+   "item_id": "S-2c16eef391",
+   "set": "synthetic",
+   "gold": {
+    "category": "crash",
+    "severity": 4
+   },
+   "reviewer": {
+    "category": "crash",
+    "severity": 4
+   }
+  },
+  {
+   "item_id": "S-64058da35b",
+   "set": "synthetic",
+   "gold": {
+    "category": "spam_or_offtopic",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "spam_or_offtopic",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "S-d981e5d83f",
+   "set": "synthetic",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "S-8075c67b3d",
+   "set": "synthetic",
+   "gold": {
+    "category": "crash",
+    "severity": 4
+   },
+   "reviewer": {
+    "category": "crash",
+    "severity": 4
+   }
+  },
+  {
+   "item_id": "S-b66d20b8ae",
+   "set": "synthetic",
+   "gold": {
+    "category": "ux_confusion",
+    "severity": 2
+   },
+   "reviewer": {
+    "category": "ux_confusion",
+    "severity": 2
+   }
+  },
+  {
+   "item_id": "S-392980a54c",
+   "set": "synthetic",
+   "gold": {
+    "category": "praise",
+    "severity": 1
+   },
+   "reviewer": {
+    "category": "praise",
+    "severity": 1
+   }
+  },
+  {
+   "item_id": "S-3a71da1701",
+   "set": "synthetic",
+   "gold": {
+    "category": "performance",
+    "severity": 3
+   },
+   "reviewer": {
+    "category": "performance",
+    "severity": 3
+   }
+  },
+  {
+   "item_id": "S-f00b720cc6",
+   "set": "synthetic",
+   "gold": {
+    "category": "billing",
+    "severity": 2
+   },
+   "reviewer": {
+    "category": "billing",
+    "severity": 2
+   }
+  },
+  {
+   "item_id": "S-bad49e2f56",
+   "set": "synthetic",
+   "gold": {
+    "category": "billing",
+    "severity": 4
+   },
+   "reviewer": {
+    "category": "billing",
+    "severity": 4
+   }
+  }
+ ]
+}

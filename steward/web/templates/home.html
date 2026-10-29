@@ -24,7 +24,7 @@ replaced by keyed pseudonyms before any model sees a word. {{ stats.excluded }} 
 {% if ev %}
 <h2>Triage evaluation</h2>
 <p class="lede small">Macro-F1 with 95% bootstrap intervals. "Real" = every written review the studio has,
-labelled by Claude and spot-checked by the developer. "Held-out synthetic" = reviews written by a different
+labelled by Claude; an independent second-model review (not a human) agreed on 50 of 50 sampled labels. "Held-out synthetic" = reviews written by a different
 model than the one that wrote the training data. Never mixed.</p>
 <table>
 <tr><th>System</th><th>Runs on</th><th>Real reviews (n={{ ev.n_real }})</th><th>Held-out synthetic (n={{ ev.n_synth }})</th><th>$ / 1k reviews</th><th>ms / review</th></tr>
