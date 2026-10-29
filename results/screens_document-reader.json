@@ -1,0 +1,40 @@
+{
+ "slug": "document-reader",
+ "scenes_tried": 0,
+ "assets": 4,
+ "accepted": 4,
+ "items": [
+  {
+   "capture": "01_home",
+   "status": "accepted",
+   "max_abs_diff": 0,
+   "pixels_checked": 410279,
+   "ui_sha256": "28058ca9668278b3",
+   "out_sha256": "28058ca9668278b3"
+  },
+  {
+   "capture": "02_pdf",
+   "status": "accepted",
+   "max_abs_diff": 0,
+   "pixels_checked": 410279,
+   "ui_sha256": "a9fa17ec322d16d7",
+   "out_sha256": "a9fa17ec322d16d7"
+  },
+  {
+   "capture": "03_search",
+   "status": "accepted",
+   "max_abs_diff": 0,
+   "pixels_checked": 410279,
+   "ui_sha256": "47b4f47ab4034e7c",
+   "out_sha256": "47b4f47ab4034e7c"
+  },
+  {
+   "capture": "07_tools",
+   "status": "accepted",
+   "max_abs_diff": 0,
+   "pixels_checked": 410279,
+   "ui_sha256": "e8c996c2f03bcd21",
+   "out_sha256": "e8c996c2f03bcd21"
+  }
+ ]
+}

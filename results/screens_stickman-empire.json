@@ -1,0 +1,40 @@
+{
+ "slug": "stickman-empire",
+ "scenes_tried": 0,
+ "assets": 4,
+ "accepted": 4,
+ "items": [
+  {
+   "capture": "01_horde",
+   "status": "accepted",
+   "max_abs_diff": 0,
+   "pixels_checked": 413096,
+   "ui_sha256": "116a2e173760ab34",
+   "out_sha256": "116a2e173760ab34"
+  },
+  {
+   "capture": "03_ultimate",
+   "status": "accepted",
+   "max_abs_diff": 0,
+   "pixels_checked": 413096,
+   "ui_sha256": "02fb0655021a8170",
+   "out_sha256": "02fb0655021a8170"
+  },
+  {
+   "capture": "04_boss",
+   "status": "accepted",
+   "max_abs_diff": 0,
+   "pixels_checked": 413096,
+   "ui_sha256": "175af09f1020f12d",
+   "out_sha256": "175af09f1020f12d"
+  },
+  {
+   "capture": "07_forge",
+   "status": "accepted",
+   "max_abs_diff": 0,
+   "pixels_checked": 413096,
+   "ui_sha256": "ef7aaea5b8f27dd5",
+   "out_sha256": "ef7aaea5b8f27dd5"
+  }
+ ]
+}
