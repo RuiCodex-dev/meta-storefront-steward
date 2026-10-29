@@ -36,6 +36,7 @@ def _highlight(text: str, quote: str) -> Markup:
 
 T.env.filters["highlight"] = _highlight
 T.env.globals["live"] = lambda: os.environ.get("STEWARD_LIVE") == "1"
+T.env.globals["demo"] = lambda: config.DEMO
 
 
 def _con():

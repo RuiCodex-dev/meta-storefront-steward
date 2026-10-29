@@ -80,3 +80,4 @@ button[disabled] { opacity: .6; cursor: default; }
 .report-text { white-space: pre-wrap; font-size: 14px; }
 details.card { margin-bottom: 10px; }
 details.card > summary { cursor: pointer; }
+.demo-banner { background: #fff6e0; color: #6b4a00; border-bottom: 1px solid #f0dca8; padding: 8px 28px; font-size: 13px; }

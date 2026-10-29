@@ -5,7 +5,7 @@
 replaced by keyed pseudonyms before any model sees a word. {{ stats.excluded }} apps are excluded by policy
 (health-related, or not written by the studio).</p>
 <div class="grid">
-  <div class="card stat"><b>{{ stats.reviews }}</b><span>real written reviews (full history)</span></div>
+  <div class="card stat"><b>{{ stats.reviews }}</b><span>{{ "synthetic demo reviews" if demo() else "real written reviews (full history)" }}</span></div>
   <div class="card stat"><b>{{ stats.crashes }}</b><span>crash / ANR issues, 90 days</span></div>
   <div class="card stat"><b>{{ stats.releases }}</b><span>releases across tracks</span></div>
   <div class="card stat"><b>{{ stats.clusters }}</b><span>issue clusters (latest run)</span></div>

@@ -111,6 +111,18 @@ latencies come from the receipts table.
 
 ## Running it
 
+**Try it without keys (demo database).** `demo/` holds, as plain JSON lines, 200 synthetic reviews in 10 languages
+(written by Muse Spark Open), the studio's own Play crash/ANR issues and releases (no user data), and the outputs of
+one recorded agent pass over exactly that data: triage, 13 issues, 38 reply drafts, 3 engineering tickets, every step
+and receipt ($0.48). Store sync and posting are off in demo mode, and a banner says so on every page.
+
+```bash
+python -m venv .venv && .venv/Scripts/pip install -r requirements.lock.txt   # .venv/bin/pip on macOS/Linux
+python scripts/run_demo.py          # builds data/demo/steward_demo.db and serves http://127.0.0.1:8765
+```
+
+**On a studio's own data** (keys and store credentials needed):
+
 ```bash
 python -m venv .venv && .venv/Scripts/pip install -r requirements.txt
 # keys are read at run time from ~/.ruicodex-keys (never from the repo): storefront-steward/meta.json, baseten.json

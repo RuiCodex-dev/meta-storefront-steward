@@ -135,6 +135,9 @@ def chat(provider: str, model: str, messages: list[dict], *, purpose: str, max_t
                               f"output_tokens={usage.output_tokens}, max_tokens={max_tokens})")
     data = None
     if schema is not None:
+        if choice.finish_reason == "length":
+            raise TruncatedOutput(f"{provider}/{model}: output cut at max_tokens={max_tokens} "
+                                  f"(output_tokens={usage.output_tokens}); JSON incomplete")
         data = json.loads(_strip_fences(text))
     return Result(text=text, data=data, usage=usage, cost_usd=usd, latency_ms=ms, model=model, provider=provider,
                   message=choice.message)

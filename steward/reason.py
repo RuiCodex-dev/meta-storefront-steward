@@ -141,7 +141,7 @@ def cluster_studio(con=None, packages: list[str] | None = None, model: str = "mu
     con = con or db.connect()
     ctx, index = build_context(con, packages)
     res = llm.chat(provider, model, [{"role": "system", "content": SYSTEM}, {"role": "user", "content": ctx}],
-                   purpose="cluster", max_tokens=12000, schema=CLUSTER_SCHEMA, schema_name="clusters",
+                   purpose="cluster", max_tokens=32000, schema=CLUSTER_SCHEMA, schema_name="clusters",
                    temperature=0.0, reasoning_effort="medium" if provider == "meta" else None, con=con)
     verified = verify_clusters(res.data["clusters"], index)
     run_id = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:4]

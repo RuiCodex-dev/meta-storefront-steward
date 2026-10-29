@@ -23,6 +23,8 @@
   {% if live() %}<span class="mode live">LIVE: approved replies are posted</span>
   {% else %}<span class="mode">Dry run: nothing is posted</span>{% endif %}
 </header>
+{% if demo() %}<div class="demo-banner">Demo database: every review here is synthetic (written by Muse Spark
+Open). Crash issues and releases are the studio's own. Store sync and posting are off.</div>{% endif %}
 <main>
 {% block body %}{% endblock %}
 </main>

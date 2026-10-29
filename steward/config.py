@@ -14,6 +14,7 @@ DATA = Path(os.environ.get("STEWARD_DATA", ROOT / "data"))          # git-ignore
 RAW = DATA / "raw"                                                   # store exports, never leave the machine
 PRIVATE = DATA / "private"                                           # re-identification map only
 DB_PATH = Path(os.environ.get("STEWARD_DB", DATA / "clean" / "steward.db"))
+DEMO = os.environ.get("STEWARD_DEMO") == "1"     # demo database: synthetic reviews only, store sync disabled
 
 KEYS_DIR = Path(os.environ.get("STEWARD_KEYS", Path.home() / ".ruicodex-keys"))
 META_KEY_FILE = KEYS_DIR / "storefront-steward" / "meta.json"

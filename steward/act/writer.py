@@ -33,12 +33,18 @@ def post(draft_id: int, actor: str, con=None) -> dict:
         raise ValueError("final text failed the outbound check; not posted")
     live = os.environ.get("STEWARD_LIVE") == "1"
     target = reidmap.resolve(d["item_id"])
-    if target is None:
+    if target is None and live:
         raise LookupError("no store review behind this pseudonym (synthetic item?)")
-    store, package, review_id = target
     if not live:
-        result = {"mode": "dry-run", "store": store, "package": package, "chars": len(text)}
-    elif store == "play":
+        if target is None:   # demo database / synthetic item: show what would happen, with nothing to send to
+            pkg = con.execute("SELECT package FROM items WHERE id=?", (d["item_id"],)).fetchone()
+            result = {"mode": "dry-run", "store": "none (synthetic review)", "package": pkg[0] if pkg else None,
+                      "chars": len(text)}
+        else:
+            result = {"mode": "dry-run", "store": target[0], "package": target[1], "chars": len(text)}
+        store = result["store"]
+    elif (store := target[0]) == "play":
+        package, review_id = target[1], target[2]
         from ..connectors import play
         r = play.publisher().reviews().reply(packageName=package, reviewId=review_id,
                                              body={"replyText": text}).execute()

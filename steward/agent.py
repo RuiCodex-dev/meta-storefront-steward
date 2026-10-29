@@ -95,6 +95,9 @@ def t_studio_overview(con) -> dict:
 
 
 def t_sync_store(con) -> dict:
+    from . import config
+    if config.DEMO:
+        return {"note": "demo database: store sync is disabled; every review here is synthetic", "new_reviews": 0}
     from .connectors import ingest
     before = con.execute("SELECT COUNT(*) FROM items WHERE synthetic=0").fetchone()[0]
     res = {"play_recent_reviews": ingest.ingest_play_api(con), "appstore_reviews": ingest.ingest_asc(con),
@@ -189,7 +192,7 @@ def run(max_steps: int = MAX_STEPS, con=None, run_id: str | None = None) -> dict
     run_id = run_id or new_run_id()
     msgs: list[dict] = [{"role": "system", "content": SYSTEM},
                         {"role": "user", "content": "Run the morning pass now."}]
-    report, seen = None, set()
+    report, seen, failures = None, set(), {}
     for step in range(1, max_steps + 1):
         res = llm.chat(*MODEL, msgs, purpose="agent-plan", max_tokens=4000, tools=TOOLS, temperature=0.0,
                        reasoning_effort="low", con=con)
@@ -215,12 +218,15 @@ def run(max_steps: int = MAX_STEPS, con=None, run_id: str | None = None) -> dict
                 result = {"ok": True}
             elif key in seen:
                 result = {"error": "duplicate call skipped; use the earlier result"}
+            elif failures.get(key, 0) >= 2:
+                result = {"error": "this call failed twice; do not retry it, report the failure"}
             elif name in IMPL:
-                seen.add(key)
                 try:
                     result = IMPL[name](con, **args)
+                    seen.add(key)            # only a successful call counts as done; a failed one may be retried
                 except Exception as e:  # noqa: BLE001 - the agent sees the error and can adapt
-                    result = {"error": f"{type(e).__name__}: {str(e)[:200]}"}
+                    failures[key] = failures.get(key, 0) + 1
+                    result = {"error": f"{type(e).__name__}: {str(e)[:200]}", "retry_allowed": failures[key] < 2}
             else:
                 result = {"error": f"unknown tool {name}"}
             text = json.dumps(result, ensure_ascii=False)[:6000]
