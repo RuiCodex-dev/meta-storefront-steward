@@ -179,15 +179,18 @@ def spotcheck(request: Request):
     ids = _spot_sample(con)
     rows = []
     for i in ids:
-        r = con.execute("SELECT i.id, i.text, i.synthetic, l.category, l.severity, sc.verdict, sc.corrected FROM items i "
-                        "JOIN labels l ON l.item_id=i.id AND l.source='gold_claude' LEFT JOIN spotcheck sc "
+        r = con.execute("SELECT i.id, i.text, i.lang, i.synthetic, l.category, l.severity, sc.verdict, sc.corrected, "
+                        "COALESCE(NULLIF(l.gloss,''), (SELECT g.gloss FROM labels g WHERE g.item_id=i.id AND "
+                        "g.source IN ('spark13_guided','teacher_spark13') AND g.gloss!='' LIMIT 1)) AS gloss "
+                        "FROM items i JOIN labels l ON l.item_id=i.id AND l.source='gold_claude' LEFT JOIN spotcheck sc "
                         "ON sc.item_id=i.id WHERE i.id=?", (i,)).fetchone()
         rows.append(dict(r))
     done = sum(1 for r in rows if r["verdict"])
     agree = sum(1 for r in rows if r["verdict"] == "agree")
     from ..taxonomy import CATEGORIES
+    from ..taxonomy import SEVERITY
     return T.TemplateResponse(request, "spotcheck.html", {"rows": rows, "done": done, "agree": agree,
-                                                          "cats": CATEGORIES})
+                                                          "cats": CATEGORIES, "sev": SEVERITY})
 
 
 @app.post("/spotcheck/{item_id}")
