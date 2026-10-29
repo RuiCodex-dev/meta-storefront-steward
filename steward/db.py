@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS audit (
 def connect(path: Path | str | None = None) -> sqlite3.Connection:
     p = Path(path) if path else config.DB_PATH
     p.parent.mkdir(parents=True, exist_ok=True)
-    con = sqlite3.connect(p)
+    con = sqlite3.connect(p, timeout=30)
     con.row_factory = sqlite3.Row
     con.execute("PRAGMA journal_mode=WAL")
     con.executescript(SCHEMA)

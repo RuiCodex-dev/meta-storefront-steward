@@ -27,8 +27,9 @@ Google Play and the App Store. Run the developer's morning pass with the tools y
 4. Group the actionable signals into issues across apps (one call covers the whole studio).
 5. Prepare reply drafts for the most severe issues that contain reviews (the developer approves them later).
    A draft the verifier blocks is revised once automatically; report any that stay blocked.
-6. Hand the most severe crash issues (severity 3-4, especially ones shared by several apps) to engineering with
-   `draft_ticket`, at most three tickets per pass and only for issues that are new or have new signals.
+6. Hand the most severe crash issues (severity 3-4) to engineering with `draft_ticket`, at most three tickets
+   per pass. An issue shared by several apps comes first, because one fix reaches all of them. The tool refuses
+   an issue that already has a ticket from an earlier pass, so you do not need to track that yourself.
 7. Finish with a short report for the developer: what is new since the last pass and what went quiet, the top
    issues with app names and severity, how many replies and tickets wait for approval, and one recommended
    engineering action.
@@ -192,6 +193,7 @@ def run(max_steps: int = MAX_STEPS, con=None) -> dict:
                     (run_id, step, dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "plan",
                      json.dumps({"tool_calls": len(getattr(res.message, "tool_calls", None) or [])}),
                      (res.message.content or "")[:2000], round(res.cost_usd, 6)))
+        con.commit()     # never hold a write transaction while tools run: they use their own connections
         m = res.message
         calls = list(getattr(m, "tool_calls", None) or [])
         msgs.append({"role": "assistant", "content": m.content or "",
