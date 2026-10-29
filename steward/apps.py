@@ -1,6 +1,6 @@
 """Which apps the steward may read.
 
-Only Rui Codex's own apps. Two classes are excluded by owner decision (docs/05-OWNER-DECISIONS.md):
+Only Rui Codex's own apps. Two classes are excluded by owner decision (2026-10-18):
 
 * health-related apps, whose reviews can carry special-category data (GDPR Art. 9);
 * apps whose code was written by someone outside Rui Codex.
