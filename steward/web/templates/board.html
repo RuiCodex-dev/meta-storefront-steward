@@ -18,7 +18,7 @@ fixed): {% for q in quiet %}{{ q.title }}{% if not loop.last %} · {% endif %}{%
   <div>{{ c.summary }}</div>
   {% for e in c.ev.evidence %}
     {% set src = (c.reviews | selectattr('id', 'equalto', e.id) | list | first) %}
-    <div class="quote">{% if src %}{{ src.text | highlight(e.quote) }}{% endif %}
+    <div class="quote">{% if src and hide(src.store) %}<i class="muted">review text hidden while recording</i>{% elif src %}{{ src.text | highlight(e.quote) }}{% endif %}
     <div class="pid">{{ e.id }} · {{ src.lang if src else '' }}</div></div>
   {% endfor %}
   {% if c.crashes %}<table style="margin:8px 0"><tr><th>App</th><th>Type</th><th>Cause</th><th>Users</th><th>Versions</th></tr>

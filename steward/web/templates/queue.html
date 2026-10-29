@@ -16,7 +16,7 @@ click{% if not live() %}, and this process is in dry-run mode{% endif %}.</p>
   {% else %}
   <div class="row"><span class="chip">reply</span><b>{{ d.package | short }}</b><span class="muted small">{{ d.store }} · {{ '★' * (d.rating or 0) }}</span>
   <span class="pid">{{ d.item_id }}</span><span class="chip">{{ d.status }}</span></div>
-  <div class="quote">{{ d.review }}</div>
+  <div class="quote">{% if hide(d.store) %}<i class="muted">review text hidden while recording</i>{% else %}{{ d.review }}{% endif %}</div>
   {% endif %}
   {% set probs = d.verifier | loads %}
   {% set att = (d.attempts or '[]') | loads %}

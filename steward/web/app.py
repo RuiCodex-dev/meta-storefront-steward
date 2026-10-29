@@ -37,6 +37,8 @@ def _highlight(text: str, quote: str) -> Markup:
 T.env.filters["highlight"] = _highlight
 T.env.globals["live"] = lambda: os.environ.get("STEWARD_LIVE") == "1"
 T.env.globals["demo"] = lambda: config.DEMO
+# Recording mode: real review text never appears on a screen recording; synthetic reviews stay visible.
+T.env.globals["hide"] = lambda store: os.environ.get("STEWARD_REDACT") == "1" and store != "synthetic"
 
 
 def _con():
@@ -90,7 +92,7 @@ def board(request: Request):
             d = dict(c)
             d["ev"] = json.loads(c["evidence"])
             d["reviews"] = [dict(r) for r in con.execute(
-                "SELECT id, package, rating, lang, version_name, text, title FROM items WHERE id IN (%s)" %
+                "SELECT id, store, package, rating, lang, version_name, text, title FROM items WHERE id IN (%s)" %
                 ",".join("?" * len(json.loads(c["item_ids"]))), json.loads(c["item_ids"]))] if json.loads(
                 c["item_ids"]) else []
             d["crash_n"] = len(json.loads(c["crash_issue_ids"]))
