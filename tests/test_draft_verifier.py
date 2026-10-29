@@ -29,3 +29,13 @@ def test_each_rule_fires():
 def test_language_guess():
     assert guess_language("Merci pour votre retour, nous regardons le problème") == "fr"
     assert guess_language("Спасибо за отзыв") == "ru"
+
+
+def test_in_n_days_is_a_promise_only_when_it_is_ours():
+    assert any("promises" in p for p in verify(_d("The fix will be ready in 3 days."), store="play", review_lang="en",
+                                               known_ids=set()))
+    assert any("promises" in p for p in verify(_d("An update is coming in 2 weeks."), store="play", review_lang="en",
+                                               known_ids=set()))
+    # the reviewer's own achievement (a false positive of the first rule, found by the checker evaluation)
+    assert verify(_d("Amazing that you finished all 5 towns in 3 days!"), store="play", review_lang="en",
+                  known_ids=set()) == []

@@ -72,6 +72,13 @@ it agreed with the H100 student on **47 of 49** real reviews, parsed 49 of 49, a
 which is enough for a studio that receives a few reviews a week ([`results/local_student_check.json`](results/local_student_check.json)).
 The agent's triage tool and the *Try it* page use this local student first and fall back to the hosted teacher.
 
+**The agent's checkers.** On 120 held-out synthetic reviews in 10 languages, 117 of 119 Spark reply drafts passed the
+deterministic verifier on the first attempt. The evaluation first showed 101 of 119: it caught a prompt defect
+(releases cited loosely), one real implied-fix claim, and one false positive in the checker itself. All three are
+described, with the fixes, in [`results/AGENT_CHECKS.md`](results/AGENT_CHECKS.md). Engineering tickets: 10 of 10
+passed first time. Store screenshots: 11 of 11 assets kept every interface pixel identical
+([`results/SCREENS.md`](results/SCREENS.md)).
+
 Full table: [`results/EVAL.md`](results/EVAL.md) (regenerate with `python scripts/run_eval.py --api`). Two test sets, never mixed:
 
 * **Real:** all 49 written reviews of the in-scope apps. With n=49 and a heavy praise majority the intervals are wide,

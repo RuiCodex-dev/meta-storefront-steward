@@ -41,14 +41,18 @@ Hard rules:
   details other reviewers mentioned as if this reviewer had said them.
 - Never invent facts. Use only the review, the issue cluster and the release notes given.
 - Never include names, e-mails, links or placeholders like [NAME].
-- cites: the ids you relied on (review id, cluster id, release name). promises: list any commitment you made
+- cites: the exact ids you relied on, copied from the id= tags (review, cluster, release). promises: list any commitment you made
   (should be empty).
 Match the tone of the developer's own earlier replies:
 {style}
 Return JSON only."""
 
 _PROMISE = re.compile(
-    r"(?i)\b(tomorrow|next week|next month|within \d+|in \d+ days|by (monday|tuesday|wednesday|thursday|friday|"
+    # "in N days" counts only as OUR commitment ("will be fixed in 3 days"), not as the reviewer's own story
+    # ("you finished all 5 towns in 3 days"), which the first version of this rule blocked (agent_checks v2).
+    r"(?i)\b(tomorrow|next week|next month|within \d+|"
+    r"(will|fix|fixed|update|patch|release|ready|available|coming)\b[^.!?]{0,40}\bin \d+ (days?|weeks?)|"
+    r"by (monday|tuesday|wednesday|thursday|friday|"
     r"january|february|march|april|may|june|july|august|september|october|november|december)|"
     r"refund|money back|compensat|we will add|will be added|yarın|haftaya|iade|rembours|dédommag|demain|"
     r"erstatt|morgen|nächste woche|terugbetal|volgende week|reembols|mañana|rimbors|domani|reembolso|amanhã|"
@@ -120,7 +124,10 @@ def draft_reply(item_id: str, cluster: dict | None = None, con=None, provider: s
     limit = LIMITS[store]
     rel = con.execute("SELECT name, notes FROM releases WHERE package=? AND track='production' LIMIT 2",
                       (it["package"],)).fetchall()
-    rel_txt = "; ".join(f"{r['name']}: {(json.loads(r['notes'] or '{}').get('en-US') or '')[:200]}" for r in rel)
+    # Releases carry an explicit id tag, like reviews and clusters: without one Spark cited "2.0.0" for the release
+    # named "2.0.0 (7)" in 17 of 120 drafts, which the verifier (correctly) refuses as an unknown id.
+    rel_txt = "\n".join(f"[RELEASE id={r['name']}] {(json.loads(r['notes'] or '{}').get('en-US') or '')[:200]}"
+                        for r in rel)
     known = {item_id} | ({cluster["id"]} if cluster else set()) | {r["name"] for r in rel}
     # Store metadata is the reviewer's device language, not the language of the text; prefer the triaged one.
     lab = con.execute("SELECT language FROM labels WHERE item_id=? ORDER BY CASE source WHEN 'triage_live' THEN 0 "
@@ -130,7 +137,7 @@ def draft_reply(item_id: str, cluster: dict | None = None, con=None, provider: s
             f"{(it['title'] + ' / ') if it['title'] else ''}{it['text']}\n\n"
             + (f"[CLUSTER id={cluster['id']}] {cluster['title']}: {cluster['summary']} "
                f"Planned action: {cluster.get('suggested_action', '')}\n\n" if cluster else "")
-            + f"[RELEASES] {rel_txt or 'none'}")
+            + (rel_txt or "[RELEASES] none"))
     msgs = [{"role": "system", "content": SYSTEM.format(limit=limit, reply_lang=reply_lang,
                                                         style=_style_examples(con, it['package']))},
             {"role": "user", "content": user}]

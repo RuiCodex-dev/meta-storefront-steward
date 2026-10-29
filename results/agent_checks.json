@@ -1,0 +1,106 @@
+{
+ "generated": "2026-10-29T07:42:43+00:00",
+ "seed": 20261030,
+ "language_check_covers": [
+  "de",
+  "en",
+  "es",
+  "fr",
+  "it",
+  "nl",
+  "pt",
+  "tr",
+  "ru (script)",
+  "zh (script)"
+ ],
+ "replies": {
+  "n": 120,
+  "errors": 1,
+  "error_messages": [
+   "OutboundPIIBlocked: draft-reply: personal data pattern(s) ['HANDLE'] in outbound text; call blocked"
+  ],
+  "first_attempt_pass": 117,
+  "blocked_first": 2,
+  "fixed_by_revision": 1,
+  "final_pass": 118,
+  "still_blocked": 1,
+  "rules_first_attempt": {
+   "promise": 2
+  },
+  "rules_after_revision": {
+   "promise": 1
+  },
+  "cost_usd_total": 0.6089,
+  "cost_usd_per_item": 0.00512,
+  "final_chars_median": 219,
+  "final_chars_max": 292,
+  "seconds_median": 3.7,
+  "by_language": {
+   "en": {
+    "n": 12,
+    "first_pass": 11,
+    "final_pass": 11
+   },
+   "tr": {
+    "n": 12,
+    "first_pass": 12,
+    "final_pass": 12
+   },
+   "de": {
+    "n": 12,
+    "first_pass": 12,
+    "final_pass": 12
+   },
+   "fr": {
+    "n": 12,
+    "first_pass": 11,
+    "final_pass": 12
+   },
+   "nl": {
+    "n": 12,
+    "first_pass": 12,
+    "final_pass": 12
+   },
+   "es": {
+    "n": 12,
+    "first_pass": 12,
+    "final_pass": 12
+   },
+   "it": {
+    "n": 12,
+    "first_pass": 12,
+    "final_pass": 12
+   },
+   "pt": {
+    "n": 12,
+    "first_pass": 12,
+    "final_pass": 12
+   },
+   "pl": {
+    "n": 11,
+    "first_pass": 11,
+    "final_pass": 11
+   },
+   "ru": {
+    "n": 12,
+    "first_pass": 12,
+    "final_pass": 12
+   }
+  }
+ },
+ "tickets": {
+  "n": 10,
+  "errors": 0,
+  "error_messages": [],
+  "first_attempt_pass": 10,
+  "blocked_first": 0,
+  "fixed_by_revision": 0,
+  "final_pass": 10,
+  "still_blocked": 0,
+  "rules_first_attempt": {},
+  "rules_after_revision": {},
+  "cost_usd_total": 0.0651,
+  "cost_usd_per_item": 0.00651
+ },
+ "receipts_merged": 131
+}

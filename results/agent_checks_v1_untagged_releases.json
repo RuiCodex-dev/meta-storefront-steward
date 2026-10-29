@@ -1,0 +1,101 @@
+{
+ "generated": "2026-10-29T07:38:55+00:00",
+ "seed": 20261030,
+ "language_check_covers": [
+  "de",
+  "en",
+  "es",
+  "fr",
+  "it",
+  "nl",
+  "pt",
+  "tr",
+  "ru (script)",
+  "zh (script)"
+ ],
+ "replies": {
+  "n": 120,
+  "errors": 1,
+  "first_attempt_pass": 101,
+  "blocked_first": 18,
+  "fixed_by_revision": 18,
+  "final_pass": 119,
+  "still_blocked": 0,
+  "rules_first_attempt": {
+   "citation": 17,
+   "promise": 1
+  },
+  "rules_after_revision": {},
+  "cost_usd_total": 0.7029,
+  "cost_usd_per_item": 0.00591,
+  "final_chars_median": 218,
+  "final_chars_max": 294,
+  "seconds_median": 4.1,
+  "by_language": {
+   "en": {
+    "n": 12,
+    "first_pass": 11,
+    "final_pass": 12
+   },
+   "tr": {
+    "n": 12,
+    "first_pass": 9,
+    "final_pass": 12
+   },
+   "de": {
+    "n": 12,
+    "first_pass": 9,
+    "final_pass": 12
+   },
+   "fr": {
+    "n": 12,
+    "first_pass": 10,
+    "final_pass": 12
+   },
+   "nl": {
+    "n": 12,
+    "first_pass": 11,
+    "final_pass": 12
+   },
+   "es": {
+    "n": 12,
+    "first_pass": 11,
+    "final_pass": 12
+   },
+   "it": {
+    "n": 12,
+    "first_pass": 10,
+    "final_pass": 12
+   },
+   "pt": {
+    "n": 12,
+    "first_pass": 9,
+    "final_pass": 12
+   },
+   "pl": {
+    "n": 11,
+    "first_pass": 11,
+    "final_pass": 11
+   },
+   "ru": {
+    "n": 12,
+    "first_pass": 10,
+    "final_pass": 12
+   }
+  }
+ },
+ "tickets": {
+  "n": 10,
+  "errors": 0,
+  "first_attempt_pass": 10,
+  "blocked_first": 0,
+  "fixed_by_revision": 0,
+  "final_pass": 10,
+  "still_blocked": 0,
+  "rules_first_attempt": {},
+  "rules_after_revision": {},
+  "cost_usd_total": 0.0658,
+  "cost_usd_per_item": 0.00658
+ },
+ "receipts_merged": 147
+}
