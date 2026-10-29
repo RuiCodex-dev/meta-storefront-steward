@@ -18,6 +18,7 @@ from . import db, llm
 from .privacy import scan
 
 LIMITS = {"play": 350, "appstore": 5970}
+MAX_ATTEMPTS = 2          # one draft plus at most one verifier-guided revision
 
 REPLY_SCHEMA = {
     "type": "object", "additionalProperties": False,
@@ -130,18 +131,30 @@ def draft_reply(item_id: str, cluster: dict | None = None, con=None, provider: s
             + (f"[CLUSTER id={cluster['id']}] {cluster['title']}: {cluster['summary']} "
                f"Planned action: {cluster.get('suggested_action', '')}\n\n" if cluster else "")
             + f"[RELEASES] {rel_txt or 'none'}")
-    res = llm.chat(provider, model, [{"role": "system", "content": SYSTEM.format(limit=limit, reply_lang=reply_lang,
-                                                                                   style=_style_examples(con, it['package']))},
-                                     {"role": "user", "content": user}],
-                   purpose="draft-reply", max_tokens=3000, schema=REPLY_SCHEMA, schema_name="reply",
-                   temperature=0.3, reasoning_effort="low" if provider == "meta" else None, con=con)
-    d = res.data
-    problems = verify(d, store=store, review_lang=reply_lang, known_ids=known)
+    msgs = [{"role": "system", "content": SYSTEM.format(limit=limit, reply_lang=reply_lang,
+                                                        style=_style_examples(con, it['package']))},
+            {"role": "user", "content": user}]
+    attempts, spent = [], 0.0
+    for n in range(1, MAX_ATTEMPTS + 1):
+        res = llm.chat(provider, model, msgs, purpose="draft-reply" if n == 1 else "draft-revise", max_tokens=3000,
+                       schema=REPLY_SCHEMA, schema_name="reply", temperature=0.3,
+                       reasoning_effort="low" if provider == "meta" else None, con=con)
+        spent += res.cost_usd
+        d = res.data
+        problems = verify(d, store=store, review_lang=reply_lang, known_ids=known)
+        attempts.append({"text": d["reply_text"], "problems": problems})
+        if not problems:
+            break
+        # Self-correction: the verifier's findings are deterministic and contain no personal data, so they can
+        # go back to the model verbatim. The final decision stays with the verifier, never with the model.
+        msgs = msgs + [{"role": "assistant", "content": res.text},
+                       {"role": "user", "content": "The deterministic verifier rejected this draft:\n- "
+                        + "\n- ".join(problems) + "\nRewrite the reply so that it passes every rule. JSON only."}]
     now = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
-    cur = con.execute("INSERT INTO drafts(item_id,cluster_id,kind,lang,text,cites,verifier,status,created_at) "
-                      "VALUES (?,?,?,?,?,?,?,?,?)",
+    cur = con.execute("INSERT INTO drafts(item_id,cluster_id,kind,lang,text,cites,verifier,status,created_at,attempts) "
+                      "VALUES (?,?,?,?,?,?,?,?,?,?)",
                       (item_id, cluster["id"] if cluster else None, "reply", d["language"], d["reply_text"],
                        json.dumps(d["cites"]), json.dumps(problems), "pending" if not problems else "rejected_by_verifier",
-                       now))
+                       now, json.dumps(attempts, ensure_ascii=False)))
     con.commit()
-    return {"draft_id": cur.lastrowid, **d, "problems": problems, "cost_usd": res.cost_usd}
+    return {"draft_id": cur.lastrowid, **d, "problems": problems, "attempts": len(attempts), "cost_usd": spent}

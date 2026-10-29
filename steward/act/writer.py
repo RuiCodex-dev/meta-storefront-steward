@@ -29,7 +29,7 @@ def post(draft_id: int, actor: str, con=None) -> dict:
     if d is None or d["status"] != "approved":
         raise PermissionError("only an approved draft can be posted")
     text = d["edited_text"] or d["text"]
-    if scan(text) or len(text) > 350:
+    if scan(text) or len(text) > 350:   # Play's limit; App Store posting is disabled below
         raise ValueError("final text failed the outbound check; not posted")
     live = os.environ.get("STEWARD_LIVE") == "1"
     target = reidmap.resolve(d["item_id"])
@@ -44,14 +44,8 @@ def post(draft_id: int, actor: str, con=None) -> dict:
                                              body={"replyText": text}).execute()
         result = {"mode": "live", "store": store, "package": package, "result": r.get("result", {})}
     elif store == "appstore":
-        from ..connectors import asc
-        import httpx
-        r = httpx.post(asc.API + "/v1/customerReviewResponses", headers={"Authorization": f"Bearer {asc._token()}"},
-                       json={"data": {"type": "customerReviewResponses", "attributes": {"responseBody": text},
-                                      "relationships": {"review": {"data": {"type": "customerReviews",
-                                                                            "id": review_id}}}}}, timeout=60)
-        r.raise_for_status()
-        result = {"mode": "live", "store": store, "package": package, "status": r.status_code}
+        # The studio's App Store Connect access is read-only while its iOS freeze lasts; no write path exists.
+        raise PermissionError("App Store replies are disabled: App Store Connect is used read-only")
     else:
         raise ValueError(f"unknown store {store}")
     now = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")

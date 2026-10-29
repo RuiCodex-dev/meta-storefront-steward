@@ -1,24 +1,40 @@
 {% extends "base.html" %}
 {% block body %}
 <h1>Approval queue</h1>
-<p class="lede">Muse Spark drafts each reply in the reviewer's language; a deterministic verifier blocks drafts that
-are too long, in the wrong language, promise dates or refunds, contain personal data or cite something that does
-not exist. Nothing reaches a store without an approval click{% if not live() %}, and this process is in dry-run
-mode{% endif %}.</p>
+<p class="lede">Two kinds of work wait here. <b>Replies</b>: Muse Spark drafts each one in the reviewer's language; a
+deterministic verifier blocks drafts that are too long, in the wrong language, promise dates or refunds, contain
+personal data or cite something that does not exist, and a blocked draft goes back to the model once with the
+verifier's findings. <b>Engineering tickets</b>: written from the issue's evidence; the verifier rejects any app,
+version or id that is not in that evidence. Nothing reaches a store or a tracker without an approval
+click{% if not live() %}, and this process is in dry-run mode{% endif %}.</p>
 {% for d in rows %}
 <div class="card cluster">
-  <div class="row"><b>{{ d.package | short }}</b><span class="muted small">{{ d.store }} · {{ '★' * (d.rating or 0) }}</span>
+  {% if d.kind == 'ticket' %}
+  <div class="row"><span class="chip">engineering ticket</span><b>{{ d.issue_title or d.cluster_id }}</b>
+  {% for a in (d.package or '').split(',') if a %}<span class="chip">{{ a | short }}</span>{% endfor %}
+  <span class="pid">{{ d.cluster_id }}</span><span class="chip">{{ d.status }}</span></div>
+  {% else %}
+  <div class="row"><span class="chip">reply</span><b>{{ d.package | short }}</b><span class="muted small">{{ d.store }} · {{ '★' * (d.rating or 0) }}</span>
   <span class="pid">{{ d.item_id }}</span><span class="chip">{{ d.status }}</span></div>
   <div class="quote">{{ d.review }}</div>
+  {% endif %}
   {% set probs = d.verifier | loads %}
+  {% set att = (d.attempts or '[]') | loads %}
   <div class="small">{% if probs %}<span class="bad">Verifier: {{ probs | join('; ') }}</span>
-  {% else %}<span class="ok">Verifier: pass</span>{% endif %} · {{ (d.edited_text or d.text) | length }} characters · {{ d.lang }}</div>
+  {% else %}<span class="ok">Verifier: pass</span>{% endif %}
+  {% if d.kind != 'ticket' %} · {{ (d.edited_text or d.text) | length }} characters · {{ d.lang }}{% endif %}
+  {% if att | length > 1 %} · <span class="muted">revised {{ att | length - 1 }}× after the verifier</span>{% endif %}</div>
+  {% if att | length > 1 %}<details class="small"><summary>What the verifier stopped</summary>
+  {% for a in att[:-1] %}<div class="muted">Attempt {{ loop.index }}: “{{ a.text }}” — <span class="bad">{{ a.problems | join('; ') }}</span></div>{% endfor %}
+  </details>{% endif %}
   <form method="post" action="/queue/{{ d.id }}">
-    <textarea name="text">{{ d.edited_text or d.text }}</textarea>
+    <textarea name="text" {% if d.kind == 'ticket' %}class="ticket" rows="14"{% endif %}>{{ d.edited_text or d.text }}</textarea>
     <div class="row" style="margin-top:6px">
     {% if d.status == 'pending' %}
       <button class="primary" name="action" value="approve">Approve</button>
       <button class="danger" name="action" value="reject">Reject</button>
+    {% elif d.status == 'approved' and d.kind == 'ticket' %}
+      <button class="primary" name="action" value="post">Export for the tracker</button>
     {% elif d.status == 'approved' %}
       <button class="primary" name="action" value="post">{{ 'Post to store' if live() else 'Post (dry run)' }}</button>
     {% endif %}

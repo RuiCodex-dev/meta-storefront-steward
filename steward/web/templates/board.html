@@ -3,11 +3,16 @@
 <h1>Issue board</h1>
 <p class="lede">Muse Spark read the whole studio in one context (every review, crash and release) and grouped the
 actionable signals. Every id it cites exists, and every quote was checked word for word against the source
-before it reached this page. Run <span class="pid">{{ run }}</span>.</p>
+before it reached this page. Run <span class="pid">{{ run }}</span>{% if previous %}, compared with the previous pass
+<span class="pid">{{ previous }}</span> by evidence overlap (titles are never compared){% endif %}.</p>
+{% if quiet %}<div class="card small"><b>Quiet since the last pass</b> (no current signal cites them; not claimed as
+fixed): {% for q in quiet %}{{ q.title }}{% if not loop.last %} · {% endif %}{% endfor %}</div>{% endif %}
 {% for c in clusters %}
 <div class="card cluster">
   <div class="row"><span class="sev sev-{{ c.severity }}">S{{ c.severity }}</span><h3>{{ c.title }}</h3>
-  <span class="{{ 'ok' if c.link_rule == 'verified' else 'bad' }} small">{{ c.link_rule }}</span></div>
+  <span class="{{ 'ok' if c.link_rule == 'verified' else 'bad' }} small">{{ c.link_rule }}</span>
+  {% if c.since.status == 'new' %}<span class="chip new">new since last pass</span>
+  {% elif c.since.status == 'ongoing' %}<span class="chip">ongoing{% if c.since.new_signals %} · {{ c.since.new_signals }} new signal(s){% endif %}</span>{% endif %}</div>
   <div class="meta">{% for a in c.package.split(',') %}<span class="chip">{{ a | short }}</span>{% endfor %}
   · {{ c.reviews | length }} review(s) · {{ c.crash_n }} crash/ANR issue(s) · first seen {{ c.first_seen_version }}</div>
   <div>{{ c.summary }}</div>

@@ -97,4 +97,20 @@ def connect(path: Path | str | None = None) -> sqlite3.Connection:
     con.row_factory = sqlite3.Row
     con.execute("PRAGMA journal_mode=WAL")
     con.executescript(SCHEMA)
+    _migrate(con)
     return con
+
+
+# Columns added after the first schema; ALTER is idempotent through the column check.
+_ADDED_COLUMNS = {
+    "drafts": [("attempts", "TEXT")],          # JSON list: every draft the model wrote and what the verifier said
+}
+
+
+def _migrate(con: sqlite3.Connection) -> None:
+    for table, cols in _ADDED_COLUMNS.items():
+        have = {r[1] for r in con.execute(f"PRAGMA table_info({table})")}
+        for name, typ in cols:
+            if name not in have:
+                con.execute(f"ALTER TABLE {table} ADD COLUMN {name} {typ}")
+    con.commit()

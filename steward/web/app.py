@@ -96,14 +96,22 @@ def board(request: Request):
             d["crashes"] = [dict(x) for x in con.execute("SELECT * FROM crash_issues")
                             if _crash_key(x["package"], x["issue_id"]) in keys]
             clusters.append(d)
-    return T.TemplateResponse(request, "board.html", {"clusters": clusters, "run": run[0] if run else None})
+    from .. import memory
+    mem = memory.compare(con, run[0]) if run else {"issues": {}, "quiet": [], "previous": None}
+    for d in clusters:
+        d["since"] = mem["issues"].get(d["id"], {})
+    return T.TemplateResponse(request, "board.html", {"clusters": clusters, "run": run[0] if run else None,
+                                                      "quiet": mem["quiet"], "previous": mem["previous"]})
 
 
 @app.get("/queue", response_class=HTMLResponse)
 def queue(request: Request):
     con = _con()
-    rows = con.execute("SELECT d.*, i.text AS review, i.rating, i.package, i.store FROM drafts d JOIN items i "
-                       "ON i.id=d.item_id ORDER BY d.id DESC").fetchall()
+    rows = con.execute("SELECT d.*, i.text AS review, i.rating, COALESCE(i.package, c.package) AS package, "
+                       "COALESCE(i.store, 'engineering') AS store, c.title AS issue_title FROM drafts d "
+                       "LEFT JOIN items i ON i.id=d.item_id LEFT JOIN clusters c ON c.id=d.cluster_id "
+                       "ORDER BY CASE d.status WHEN 'pending' THEN 0 WHEN 'approved' THEN 1 ELSE 2 END, d.id DESC"
+                       ).fetchall()
     audit = con.execute("SELECT * FROM audit ORDER BY id DESC LIMIT 20").fetchall()
     return T.TemplateResponse(request, "queue.html", {"rows": rows, "audit": audit})
 
@@ -111,9 +119,11 @@ def queue(request: Request):
 @app.post("/queue/{draft_id}")
 def decide(draft_id: int, action: str = Form(...), text: str = Form("")):
     con = _con()
-    d = con.execute("SELECT d.*, i.store FROM drafts d JOIN items i ON i.id=d.item_id WHERE d.id=?",
+    d = con.execute("SELECT d.*, i.store FROM drafts d LEFT JOIN items i ON i.id=d.item_id WHERE d.id=?",
                     (draft_id,)).fetchone()
     now = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+    if d["kind"] == "ticket":
+        return _decide_ticket(con, d, action, text, now)
     if action == "approve":
         final = text.strip() or d["text"]
         problems = verify({"reply_text": final, "cites": [], "promises": []}, store=d["store"],
@@ -127,6 +137,31 @@ def decide(draft_id: int, action: str = Form(...), text: str = Form("")):
         con.execute("UPDATE drafts SET status='rejected', decided_at=? WHERE id=?", (now, draft_id))
     elif action == "post":
         writer.post(draft_id, actor="owner-via-ui", con=con)
+    con.commit()
+    return RedirectResponse("/queue", status_code=303)
+
+
+def _decide_ticket(con, d, action: str, text: str, now: str):
+    from .. import ticket
+    from ..act.writer import _audit
+    from ..privacy import scan
+    if action == "approve":
+        final = text.strip().replace("\r\n", "\n") or d["text"]
+        hits = scan(final)
+        if hits:
+            con.execute("UPDATE drafts SET verifier=? WHERE id=?", (json.dumps([f"personal data pattern(s): {hits}"]),
+                                                                    d["id"]))
+        else:
+            con.execute("UPDATE drafts SET status='approved', edited_text=?, decided_at=? WHERE id=?",
+                        (final if final != d["text"] else None, now, d["id"]))
+    elif action == "reject":
+        con.execute("UPDATE drafts SET status='rejected', decided_at=? WHERE id=?", (now, d["id"]))
+    elif action == "post":
+        path = ticket.export(d["id"], con=con)
+        con.execute("UPDATE drafts SET status='exported', posted_at=?, post_result=? WHERE id=?",
+                    (now, json.dumps({"exported_to": "data/tickets/" + Path(path).name}),
+                     d["id"]))
+        _audit(con, "owner-via-ui", "ticket-exported", f"draft:{d['id']}", {"issue": d["cluster_id"]})
     con.commit()
     return RedirectResponse("/queue", status_code=303)
 

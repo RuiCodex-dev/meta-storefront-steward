@@ -14,10 +14,10 @@ import uuid
 
 import httpx
 
-from . import apps, budget, db, draft, llm, reason, triage
+from . import apps, budget, db, draft, llm, memory, reason, ticket, triage
 
 MODEL = ("meta", "muse-spark-1.3")
-MAX_STEPS = 10
+MAX_STEPS = 12
 
 SYSTEM = """You are Storefront Steward, an operations agent for a small studio with many apps on
 Google Play and the App Store. Run the developer's morning pass with the tools you have:
@@ -26,8 +26,12 @@ Google Play and the App Store. Run the developer's morning pass with the tools y
 3. Triage anything untriaged.
 4. Group the actionable signals into issues across apps (one call covers the whole studio).
 5. Prepare reply drafts for the most severe issues that contain reviews (the developer approves them later).
-6. Finish with a short report for the developer: what changed, the top issues with app names and severity,
-   how many drafts wait for approval, and one recommended engineering action.
+   A draft the verifier blocks is revised once automatically; report any that stay blocked.
+6. Hand the most severe crash issues (severity 3-4, especially ones shared by several apps) to engineering with
+   `draft_ticket`, at most three tickets per pass and only for issues that are new or have new signals.
+7. Finish with a short report for the developer: what is new since the last pass and what went quiet, the top
+   issues with app names and severity, how many replies and tickets wait for approval, and one recommended
+   engineering action.
 You cannot post anything to a store and you must not claim that anything was posted. Be economical: do not
 repeat a tool call with the same arguments. Stop by calling `finish`."""
 
@@ -47,6 +51,11 @@ TOOLS = [
         "parameters": {"type": "object", "properties": {}, "additionalProperties": False}}},
     {"type": "function", "function": {"name": "draft_replies", "description":
         "Draft verified replies for the reviews in one issue and put them in the approval queue.",
+        "parameters": {"type": "object", "properties": {"issue_id": {"type": "string"}},
+                       "required": ["issue_id"], "additionalProperties": False}}},
+    {"type": "function", "function": {"name": "draft_ticket", "description":
+        "Write a verified engineering ticket for one issue (apps, affected versions, suspected component, first "
+        "debugging step, evidence ids) and put it in the approval queue.",
         "parameters": {"type": "object", "properties": {"issue_id": {"type": "string"}},
                        "required": ["issue_id"], "additionalProperties": False}}},
     {"type": "function", "function": {"name": "finish", "description": "End the run with the report.",
@@ -124,10 +133,13 @@ def t_triage_untriaged(con) -> dict:
 
 def t_cluster_issues(con) -> dict:
     r = reason.cluster_studio(con)
+    mem = memory.compare(con, r["run_id"])
     return {"issues": [{"issue_id": c["id"], "title": c["title"], "severity": c["severity"],
                         "apps": [apps.get(p).name if apps.get(p) else p for p in c["apps"]],
                         "reviews": len(c["review_ids"]), "crash_issues": len(c["crash_ids"]),
-                        "verified": c["verified"]} for c in r["clusters"]],
+                        "verified": c["verified"], "since_last_pass": mem["issues"].get(c["id"], {})}
+                       for c in r["clusters"]],
+            "quiet_since_last_pass": [q["title"] for q in mem["quiet"]],
             "context_tokens": r["input_tokens"], "cached_tokens": r["cached_tokens"]}
 
 
@@ -145,12 +157,25 @@ def t_draft_replies(con, issue_id: str) -> dict:
             continue
         d = draft.draft_reply(rid, cl, con=con)
         out.append({"review": rid, "status": "queued" if not d["problems"] else "blocked by verifier",
-                    "problems": d["problems"]})
+                    "attempts": d["attempts"], "problems": d["problems"]})
     return {"issue": c["title"], "drafts": out}
 
 
+def t_draft_ticket(con, issue_id: str) -> dict:
+    if con.execute("SELECT 1 FROM clusters WHERE id=?", (issue_id,)).fetchone() is None:
+        return {"error": f"unknown issue id {issue_id}"}
+    same = memory.same_issue_ids(con, issue_id)      # the same issue in earlier passes carries other ids
+    prior = con.execute("SELECT id, status FROM drafts WHERE kind='ticket' AND status IN ('pending','approved') AND "
+                        "cluster_id IN (%s)" % ",".join("?" * len(same)), same).fetchone()
+    if prior:
+        return {"issue": issue_id, "status": f"ticket already {prior['status']} (draft {prior['id']})"}
+    t = ticket.draft_ticket(issue_id, con=con)
+    return {"issue": issue_id, "ticket": t["title"], "status": "queued" if not t["problems"] else
+            "blocked by verifier", "attempts": t["attempts"], "problems": t["problems"]}
+
+
 IMPL = {"studio_overview": t_studio_overview, "sync_store": t_sync_store, "triage_untriaged": t_triage_untriaged,
-        "cluster_issues": t_cluster_issues, "draft_replies": t_draft_replies}
+        "cluster_issues": t_cluster_issues, "draft_replies": t_draft_replies, "draft_ticket": t_draft_ticket}
 
 
 def run(max_steps: int = MAX_STEPS, con=None) -> dict:
