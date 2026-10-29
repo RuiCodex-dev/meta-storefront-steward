@@ -28,7 +28,14 @@ META_BASE_URL = "https://api.meta.ai/v1"
 BASETEN_BASE_URL = "https://inference.baseten.co/v1"
 
 
+class MissingKey(RuntimeError):
+    pass
+
+
 def _read_json(path: Path) -> dict:
+    if not path.exists():
+        raise MissingKey(f"no key file at {path.name} under STEWARD_KEYS; browsing works without keys, model calls "
+                         f"need a Meta Model API key (see the README)")
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)
 

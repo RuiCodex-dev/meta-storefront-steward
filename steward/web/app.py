@@ -291,12 +291,20 @@ def try_run(request: Request, text: str = Form(...)):
     clean, hits = scrub(text)
     local = student.available()
     t0 = _t.time()
-    if local:
-        lab = student.classify(clean)
-        engine = "Muse Glimmer 30B student, on this PC (llama.cpp, no network)"
-    else:
-        lab = next(iter(triage.label_items("meta", "muse-spark-1.3", [{"id": "try", "text": clean}],
-                                           purpose="try-it").values()))
-        engine = "Muse Spark 1.3 teacher (hosted)"
-    res = {"clean": clean, "hits": hits, "label": lab, "engine": engine, "ms": round((_t.time() - t0) * 1000)}
+    error = None
+    try:
+        if local:
+            lab = student.classify(clean)
+            engine = "Muse Glimmer 30B student, on this PC (llama.cpp, no network)"
+        else:
+            from .. import llm
+            lab = triage.label_batch("meta", "muse-spark-1.3", [{"id": "try", "text": clean}], "guided",
+                                     "try-it").get("try")
+            engine = "Muse Spark 1.3 teacher (hosted)"
+            if lab is None:
+                raise RuntimeError("the model returned no label for this text")
+    except Exception as e:  # noqa: BLE001 - shown on the page; the scrubbed text is still displayed
+        lab, engine, error = None, "none", f"{type(e).__name__}: {e}"
+    res = {"clean": clean, "hits": hits, "label": lab, "engine": engine, "error": error,
+           "ms": round((_t.time() - t0) * 1000)}
     return T.TemplateResponse(request, "try.html", {"result": res, "local": local, "text": text})

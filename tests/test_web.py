@@ -14,3 +14,14 @@ def test_pages_render_on_empty_db():
         r = c.get(path)
         assert r.status_code == 200, path
     assert "Dry run" in c.get("/").text
+
+
+def test_try_it_without_any_model_explains_instead_of_failing(monkeypatch):
+    from steward import student, triage
+
+    def no_key(*a, **k):
+        raise RuntimeError("no key")
+    monkeypatch.setattr(student, "available", lambda timeout=2.0: False)
+    monkeypatch.setattr(triage, "label_batch", no_key)
+    r = TestClient(app).post("/try", data={"text": "crashes when I open the shop, mail me at a@example.com"})
+    assert r.status_code == 200 and "No triage model is available" in r.text and "[EMAIL]" in r.text

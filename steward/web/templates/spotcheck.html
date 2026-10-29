@@ -26,6 +26,8 @@ Progress: <strong>{{ done }} / {{ rows | length }}</strong> checked, {{ agree }}
   <p class="small">Severity: {% for k, v in sev.items() %}<strong>S{{ k }}</strong> {{ v }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
 </details>
 
+{% if not rows %}<div class="card small">The spot check runs on the developer's real database (gold labels on real
+reviews), which never leaves the studio's machine. The demo database has none.</div>{% endif %}
 {% for r in rows %}
 <div class="card cluster" id="{{ r.id }}">
   <div class="row"><span class="pid">#{{ loop.index }} · {{ r.id }}</span><span class="chip">{{ 'synthetic' if r.synthetic else 'real' }}</span>

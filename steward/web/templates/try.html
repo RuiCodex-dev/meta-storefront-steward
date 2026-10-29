@@ -10,9 +10,13 @@ hosted teacher){% endif %}.</p>
 </form>
 {% if result %}
 <div class="card" style="margin-top:16px">
+  {% if result.label %}
   <div class="row"><span class="chip">{{ result.label.category }}</span><span class="sev sev-{{ result.label.severity }}">S{{ result.label.severity }}</span>
   <span class="chip">{{ result.label.language }}</span><span class="muted small">{{ result.engine }} · {{ result.ms }} ms</span></div>
-  <h2>What the model saw</h2>
+  {% else %}
+  <div class="bad small">No triage model is available: {{ result.error }}</div>
+  {% endif %}
+  <h2>{{ "What the model saw" if result.label else "What a model would see (the scrubber runs locally, without any key)" }}</h2>
   <div class="quote">{{ result.clean }}</div>
   <div class="small muted">Removed before any model call: {{ result.hits | join(', ') if result.hits else 'nothing' }}</div>
 </div>
