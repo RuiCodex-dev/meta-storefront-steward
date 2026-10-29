@@ -1,0 +1,22 @@
+<div class="run" data-done="{{ 1 if v.done else 0 }}">
+  <ol class="timeline">
+  {% for s in v.steps %}
+    {% if s.kind == 'plan' %}
+    <li class="thought"><span class="who">Muse Spark</span> {{ s.summary }}</li>
+    {% else %}
+    <li class="step">
+      <div class="row"><span class="chip tool">{{ s.tool }}</span>{% if s.args != '{}' %}<span class="pid">{{ s.args }}</span>{% endif %}
+      <span class="cost">${{ '%.4f' % s.cost }}</span></div>
+      <div class="sum">{{ s.summary }}</div>
+      <details><summary>raw result</summary><pre>{{ s.raw }}</pre></details>
+    </li>
+    {% endif %}
+  {% endfor %}
+  {% if not v.done %}<li class="step working"><span class="spinner"></span> working…</li>{% endif %}
+  </ol>
+  {% if v.report %}
+  <div class="card report"><h3>Morning report</h3><div class="report-text">{{ v.report }}</div></div>
+  {% endif %}
+  <div class="small muted">{{ v.tools }} tool call(s) · ${{ '%.4f' % v.cost }} for the whole pass{% if v.seconds %} · {{ v.seconds }} s{% endif %}
+  · nothing was posted: posting is not one of the agent's tools</div>
+</div>

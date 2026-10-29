@@ -179,10 +179,14 @@ IMPL = {"studio_overview": t_studio_overview, "sync_store": t_sync_store, "triag
         "cluster_issues": t_cluster_issues, "draft_replies": t_draft_replies, "draft_ticket": t_draft_ticket}
 
 
-def run(max_steps: int = MAX_STEPS, con=None) -> dict:
+def new_run_id() -> str:
+    return dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:4]
+
+
+def run(max_steps: int = MAX_STEPS, con=None, run_id: str | None = None) -> dict:
     con = con or db.connect()
     _ensure_tables(con)
-    run_id = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:4]
+    run_id = run_id or new_run_id()
     msgs: list[dict] = [{"role": "system", "content": SYSTEM},
                         {"role": "user", "content": "Run the morning pass now."}]
     report, seen = None, set()

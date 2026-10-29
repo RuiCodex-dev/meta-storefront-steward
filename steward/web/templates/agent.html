@@ -1,22 +1,38 @@
 {% extends "base.html" %}
 {% block body %}
-<h1>Agent runs</h1>
-<p class="lede">Muse Spark plans the developer's morning pass and calls the steward's own tools: overview, store
-sync, triage, whole-studio issue grouping, reply drafting. Posting to a store is not one of its tools; drafts wait
-in the approval queue. Every step and its cost is recorded here.</p>
-<form method="post" action="/agent/run"><button class="primary">Run the morning pass now</button></form>
+<h1>Agent</h1>
+<p class="lede">Muse Spark runs the developer's morning pass with the steward's own tools: studio overview, store sync
+(read-only), triage, whole-studio issue grouping with memory of the last pass, reply drafts and engineering tickets.
+Posting to a store is not one of its tools: everything it prepares waits in the approval queue. Every step and its
+cost is recorded.</p>
+<form method="post" action="/agent/run"><button class="primary" {% if running %}disabled{% endif %}>
+{% if running %}A pass is running…{% else %}Run the morning pass now{% endif %}</button></form>
 {% for r in runs %}
+{% set v = views[r] %}
+{% if loop.first or r == watch %}
 <h2>Run <span class="pid">{{ r }}</span></h2>
-<table><tr><th>Step</th><th>Tool</th><th>Arguments</th><th>Result</th><th>USD</th></tr>
-{% for s in steps[r] %}
-{% if s.tool == 'report' %}
-<tr><td></td><td><b>Report</b></td><td colspan="3" style="white-space: pre-wrap">{{ s.result }}</td></tr>
+<div {% if r == watch and not v.done %}data-watch="{{ r }}"{% endif %}>
+{% include "agent_run.html" %}
+</div>
 {% else %}
-<tr><td class="num">{{ s.step }}</td><td><span class="chip">{{ s.tool }}</span></td><td class="pid">{{ s.args }}</td>
-<td class="small" style="max-width:560px; overflow-wrap:anywhere">{{ s.result[:400] }}{% if s.result|length > 400 %}…{% endif %}</td>
-<td class="num">{{ '%.4f' % (s.cost_usd or 0) }}</td></tr>
+<details class="card"><summary><b>Run <span class="pid">{{ r }}</span></b> · {{ v.tools }} tool call(s) ·
+${{ '%.4f' % v.cost }}</summary>{% include "agent_run.html" %}</details>
 {% endif %}
 {% endfor %}
-</table>
-{% endfor %}
+<script>
+(function () {
+  var el = document.querySelector("[data-watch]");
+  if (!el) return;
+  var id = el.getAttribute("data-watch");
+  function tick() {
+    fetch("/agent/run/" + id).then(function (r) { return r.text(); }).then(function (h) {
+      el.innerHTML = h;
+      var done = el.querySelector('[data-done="1"]');
+      if (!done) { setTimeout(tick, 1200); }
+      else { var b = document.querySelector("form button"); if (b) { b.disabled = false; b.textContent = "Run the morning pass now"; } }
+    }).catch(function () { setTimeout(tick, 2500); });
+  }
+  setTimeout(tick, 800);
+})();
+</script>
 {% endblock %}

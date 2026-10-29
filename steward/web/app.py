@@ -9,6 +9,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import os
+import threading
 from pathlib import Path
 
 from fastapi import FastAPI, Form, Request
@@ -56,7 +57,8 @@ def home(request: Request):
         "releases": con.execute("SELECT COUNT(*) FROM releases").fetchone()[0],
         "clusters": con.execute("SELECT COUNT(*) FROM clusters WHERE run_id=(SELECT run_id FROM clusters "
                                 "ORDER BY created_at DESC LIMIT 1)").fetchone()[0],
-        "pending": con.execute("SELECT COUNT(*) FROM drafts WHERE status='pending'").fetchone()[0],
+        "pending": con.execute("SELECT COUNT(*) FROM drafts WHERE status='pending' AND kind='reply'").fetchone()[0],
+        "tickets": con.execute("SELECT COUNT(*) FROM drafts WHERE status='pending' AND kind='ticket'").fetchone()[0],
         "synthetic": con.execute("SELECT COUNT(*) FROM items WHERE synthetic=1").fetchone()[0],
     }
     spend = {p: (round(budget.spent(con, p), 4), budget.CAPS_USD[p]) for p in ("meta", "baseten")}
@@ -175,22 +177,58 @@ def receipts(request: Request):
         "recent": con.execute("SELECT * FROM receipts ORDER BY id DESC LIMIT 30").fetchall()})
 
 
+_RUN_LOCK = threading.Lock()
+_CURRENT: dict[str, str | None] = {"run_id": None}
+
+
+def _run_rows(con, run_id: str) -> list[dict]:
+    return [dict(x) for x in con.execute("SELECT * FROM agent_steps WHERE run_id=? ORDER BY step, rowid", (run_id,))]
+
+
 @app.get("/agent", response_class=HTMLResponse)
-def agent_page(request: Request):
+def agent_page(request: Request, watch: str | None = None):
+    from . import agentview
     con = _con()
     con.execute("CREATE TABLE IF NOT EXISTS agent_steps (run_id TEXT, step INTEGER, ts TEXT, tool TEXT, args TEXT, "
                 "result TEXT, cost_usd REAL)")
-    runs = [r[0] for r in con.execute("SELECT DISTINCT run_id FROM agent_steps ORDER BY run_id DESC LIMIT 10")]
-    steps = {r: [dict(x) for x in con.execute("SELECT * FROM agent_steps WHERE run_id=? ORDER BY step, rowid",
-                                              (r,))] for r in runs}
-    return T.TemplateResponse(request, "agent.html", {"runs": runs, "steps": steps})
+    runs = [r[0] for r in con.execute("SELECT DISTINCT run_id FROM agent_steps ORDER BY run_id DESC LIMIT 8")]
+    if watch and watch not in runs:
+        runs.insert(0, watch)
+    views = {r: agentview.timeline(_run_rows(con, r)) for r in runs}
+    return T.TemplateResponse(request, "agent.html", {"runs": runs, "views": views, "watch": watch,
+                                                      "running": _RUN_LOCK.locked()})
+
+
+@app.get("/agent/run/{run_id}", response_class=HTMLResponse)
+def agent_fragment(request: Request, run_id: str):
+    from . import agentview
+    v = agentview.timeline(_run_rows(_con(), run_id))
+    return T.TemplateResponse(request, "agent_run.html", {"run_id": run_id, "v": v, "open": True})
 
 
 @app.post("/agent/run")
 def agent_run():
+    """Start one morning pass in the background; the page polls its steps as they are written."""
     from .. import agent
-    agent.run()
-    return RedirectResponse("/agent", status_code=303)
+    if not _RUN_LOCK.acquire(blocking=False):
+        return RedirectResponse(f"/agent?watch={_CURRENT['run_id']}", status_code=303)
+    run_id = agent.new_run_id()
+    _CURRENT["run_id"] = run_id
+
+    def work():
+        try:
+            agent.run(run_id=run_id)
+        except Exception as e:  # noqa: BLE001 - shown in the run itself, never swallowed silently
+            c = db.connect()
+            c.execute("INSERT INTO agent_steps VALUES (?,?,?,?,?,?,?)",
+                      (run_id, 999, dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "report", "{}",
+                       f"The run stopped: {type(e).__name__}: {str(e)[:300]}", 0.0))
+            c.commit()
+        finally:
+            _RUN_LOCK.release()
+
+    threading.Thread(target=work, daemon=True).start()
+    return RedirectResponse(f"/agent?watch={run_id}", status_code=303)
 
 
 # ------------------------------------------------------------------ owner spot check of the Claude gold labels

@@ -55,3 +55,28 @@ button.danger { color: var(--bad); }
 .ci { color: var(--muted); font-size: 12px; }
 .chip.new { background: #fff1d6; color: var(--warn); font-weight: 600; }
 .ticket { white-space: pre-wrap; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+button[disabled] { opacity: .6; cursor: default; }
+.timeline { list-style: none; margin: 10px 0 14px; padding: 0 0 0 18px; border-left: 2px solid var(--line); }
+.timeline li { position: relative; margin: 0 0 10px; }
+.timeline li::before { content: ""; position: absolute; left: -24px; top: 12px; width: 10px; height: 10px;
+  border-radius: 50%; background: var(--line); }
+.timeline li.step { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+.timeline li.step::before { background: var(--accent); }
+.timeline li.thought { color: var(--muted); font-size: 13.5px; padding: 2px 0 2px 2px; font-style: italic; }
+.timeline li.thought::before { top: 8px; width: 8px; height: 8px; left: -23px; }
+.timeline .who { font-style: normal; font-weight: 600; color: var(--ink); margin-right: 6px; font-size: 12px; }
+.timeline .chip.tool { background: #e7edff; color: var(--accent); font-family: var(--mono); font-weight: 600; }
+.timeline .cost { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.timeline .sum { margin-top: 2px; }
+.timeline details summary { font-size: 12px; color: var(--muted); cursor: pointer; margin-top: 4px; }
+.timeline pre { font-family: var(--mono); font-size: 11.5px; white-space: pre-wrap; overflow-wrap: anywhere;
+  max-height: 260px; overflow: auto; background: #f7f7f4; padding: 8px; border-radius: 6px; }
+.timeline li.working { color: var(--muted); }
+.spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--line);
+  border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -1px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.report { border-left: 4px solid var(--accent); margin-bottom: 8px; }
+.report h3 { margin: 0 0 6px; font-size: 15px; }
+.report-text { white-space: pre-wrap; font-size: 14px; }
+details.card { margin-bottom: 10px; }
+details.card > summary { cursor: pointer; }
