@@ -1,0 +1,383 @@
+1
+00:00:00,550 --> 00:00:02,050
+Three different games.
+
+2
+00:00:02,070 --> 00:00:03,250
+The same crash,
+
+3
+00:00:03,270 --> 00:00:04,130
+on the same line
+
+4
+00:00:04,150 --> 00:00:05,650
+of a sound library.
+
+5
+00:00:05,670 --> 00:00:07,410
+No single store console would
+
+6
+00:00:07,430 --> 00:00:08,480
+ever show you that.
+
+7
+00:00:09,840 --> 00:00:11,500
+We are Rui Codex,
+
+8
+00:00:11,520 --> 00:00:13,180
+a small studio in Belgium,
+
+9
+00:00:13,200 --> 00:00:15,020
+with 34 apps on Google
+
+10
+00:00:15,040 --> 00:00:16,620
+Play and the App Store.
+
+11
+00:00:16,640 --> 00:00:18,700
+Our feedback is not a flood.
+
+12
+00:00:18,720 --> 00:00:20,060
+It is a trickle:
+
+13
+00:00:20,080 --> 00:00:22,780
+51 written reviews in 9 languages,
+
+14
+00:00:22,800 --> 00:00:25,820
+42 crash issues and 68 releases,
+
+15
+00:00:25,840 --> 00:00:27,660
+scattered across two stores and
+
+16
+00:00:27,680 --> 00:00:29,580
+a crash console nobody opens
+
+17
+00:00:29,600 --> 00:00:30,410
+on a Monday.
+
+18
+00:00:31,560 --> 00:00:32,980
+So during this hackathon
+
+19
+00:00:33,000 --> 00:00:34,980
+we built Storefront Steward:
+
+20
+00:00:35,000 --> 00:00:36,020
+an agent that runs
+
+21
+00:00:36,040 --> 00:00:37,780
+the studio's morning pass,
+
+22
+00:00:37,800 --> 00:00:39,140
+with one rule.
+
+23
+00:00:39,160 --> 00:00:40,580
+Nothing reaches a store
+
+24
+00:00:40,600 --> 00:00:41,970
+without a human click.
+
+25
+00:00:42,940 --> 00:00:44,760
+One click starts the pass.
+
+26
+00:00:44,780 --> 00:00:46,120
+Muse Spark plans it,
+
+27
+00:00:46,140 --> 00:00:47,640
+and calls our own tools:
+
+28
+00:00:47,660 --> 00:00:49,320
+a read-only store sync,
+
+29
+00:00:49,340 --> 00:00:52,920
+triage, grouping, reply drafts and tickets.
+
+30
+00:00:52,940 --> 00:00:54,520
+Every step, and its cost,
+
+31
+00:00:54,540 --> 00:00:55,990
+appears as it happens.
+
+32
+00:00:56,930 --> 00:00:57,870
+Every review,
+
+33
+00:00:57,890 --> 00:00:58,990
+crash and release of the
+
+34
+00:00:59,010 --> 00:01:00,270
+whole studio fits in one
+
+35
+00:01:00,290 --> 00:01:02,270
+Muse Spark context.
+
+36
+00:01:02,290 --> 00:01:03,550
+No retrieval.
+
+37
+00:01:03,570 --> 00:01:06,350
+It returns issues as strict JSON,
+
+38
+00:01:06,370 --> 00:01:07,870
+and plain code checks
+
+39
+00:01:07,890 --> 00:01:09,310
+every cited id,
+
+40
+00:01:09,330 --> 00:01:10,430
+and every quote,
+
+41
+00:01:10,450 --> 00:01:11,390
+word for word,
+
+42
+00:01:11,410 --> 00:01:13,150
+before anything is shown.
+
+43
+00:01:13,170 --> 00:01:15,390
+It also remembers the last pass,
+
+44
+00:01:15,410 --> 00:01:16,030
+so it can tell
+
+45
+00:01:16,050 --> 00:01:17,100
+you what is new.
+
+46
+00:01:17,880 --> 00:01:19,380
+Then it drafts replies,
+
+47
+00:01:19,400 --> 00:01:21,540
+in the reviewer's own language.
+
+48
+00:01:21,560 --> 00:01:22,180
+Here,
+
+49
+00:01:22,200 --> 00:01:24,020
+Spark promised that ads would
+
+50
+00:01:24,040 --> 00:01:26,420
+become skippable within five seconds.
+
+51
+00:01:26,440 --> 00:01:27,700
+Only a release note
+
+52
+00:01:27,720 --> 00:01:29,220
+may promise a feature.
+
+53
+00:01:29,240 --> 00:01:31,300
+The verifier blocked the draft,
+
+54
+00:01:31,320 --> 00:01:32,900
+sent the reason back once,
+
+55
+00:01:32,920 --> 00:01:34,450
+and the revision passed.
+
+56
+00:01:35,310 --> 00:01:37,450
+On 120 held-out reviews
+
+57
+00:01:37,470 --> 00:01:38,810
+in 10 languages,
+
+58
+00:01:38,830 --> 00:01:42,090
+117 of 119 drafts
+
+59
+00:01:42,110 --> 00:01:43,690
+passed first time.
+
+60
+00:01:43,710 --> 00:01:45,210
+Building that test found a
+
+61
+00:01:45,230 --> 00:01:46,810
+defect in our own prompt,
+
+62
+00:01:46,830 --> 00:01:48,090
+and a false alarm
+
+63
+00:01:48,110 --> 00:01:49,320
+in our own checker.
+
+64
+00:01:50,140 --> 00:01:52,600
+For engineering, it writes the ticket.
+
+65
+00:01:52,620 --> 00:01:54,040
+One fix in the sound
+
+66
+00:01:54,060 --> 00:01:56,150
+library reaches three games.
+
+67
+00:01:56,220 --> 00:01:56,920
+Approve it,
+
+68
+00:01:56,940 --> 00:01:57,880
+and it is exported
+
+69
+00:01:57,900 --> 00:01:58,870
+for the tracker.
+
+70
+00:01:59,580 --> 00:02:00,600
+For the store listing,
+
+71
+00:02:00,620 --> 00:02:03,160
+Muse Image paints only the scene.
+
+72
+00:02:03,180 --> 00:02:05,320
+SAM finds the phone's screen,
+
+73
+00:02:05,340 --> 00:02:06,600
+and our code places
+
+74
+00:02:06,620 --> 00:02:08,520
+the untouched app capture.
+
+75
+00:02:08,540 --> 00:02:11,480
+A guard compares every interface pixel.
+
+76
+00:02:11,500 --> 00:02:13,320
+The difference must be zero,
+
+77
+00:02:13,340 --> 00:02:15,190
+or the image is thrown away.
+
+78
+00:02:16,610 --> 00:02:18,190
+Personal data is removed
+
+79
+00:02:18,210 --> 00:02:19,790
+before any model call.
+
+80
+00:02:19,810 --> 00:02:21,550
+And triage itself runs
+
+81
+00:02:21,570 --> 00:02:22,830
+on open weights:
+
+82
+00:02:22,850 --> 00:02:25,870
+we distilled Spark into Muse Glimmer.
+
+83
+00:02:25,890 --> 00:02:30,670
+0.993 macro-F1, against the teacher's 0.991,
+
+84
+00:02:30,690 --> 00:02:32,430
+at a fifth of the cost.
+
+85
+00:02:32,450 --> 00:02:33,630
+It even runs on
+
+86
+00:02:33,650 --> 00:02:34,910
+a single PC,
+
+87
+00:02:34,930 --> 00:02:36,140
+with no network.
+
+88
+00:02:37,020 --> 00:02:38,280
+Every call is priced
+
+89
+00:02:38,300 --> 00:02:39,400
+before it is sent,
+
+90
+00:02:39,420 --> 00:02:41,400
+and written to a receipt.
+
+91
+00:02:41,420 --> 00:02:42,840
+The whole build used under
+
+92
+00:02:42,860 --> 00:02:45,590
+$10 of Meta API credit.
+
+93
+00:02:47,230 --> 00:02:48,570
+Storefront Steward.
+
+94
+00:02:48,590 --> 00:02:50,010
+The studio's feedback,
+
+95
+00:02:50,030 --> 00:02:51,130
+read in one place,
+
+96
+00:02:51,150 --> 00:02:52,920
+and answered with a human click.
