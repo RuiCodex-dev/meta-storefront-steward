@@ -7,7 +7,7 @@ without a human click.**
 
 Built by Rui Codex for the Meta Global AI Developer Hackathon (Indie track, theme *Build for Your World*).
 
-**Video (2:59):** VIDEO_LINK_AT_SUBMISSION. Real recordings of the running app, synthetic AI narration (disclosed),
+**Video (2:59):** https://youtu.be/ej_MK8qLhDk. Real recordings of the running app, synthetic AI narration (disclosed),
 captions in `video/storefront-steward.srt`.
 Everything in this repository was written during the building period (27 Oct - 4 Nov 2026); the design notes in
 `docs/` predate it and contain no code.
