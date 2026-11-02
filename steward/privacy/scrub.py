@@ -25,9 +25,13 @@ _PATTERNS: list[tuple[str, re.Pattern]] = [
                             r"(?:\s*(?:id|no|nr|number|numéro|nummer|numarası|numero))?)\s*[:#]?\s*"
                             r"((?=[A-Z0-9-]*\d)[A-Z0-9][A-Z0-9-]{6,})")),
     ("IBAN", re.compile(r"\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,3})?\b")),
-    ("PHONE", re.compile(r"(?<![\w.])(?:\+|00)\d[\d\s().\-/]{7,}\d(?![\w.])")),
-    ("PHONE", re.compile(r"(?<![\w.])0\d{1,3}[\s.\-/]\d{2,4}(?:[\s.\-/]\d{2,4}){1,3}(?![\w.])")),
-    ("NUMBER", re.compile(r"(?<![\w.])(?:\d[ \-]?){12,18}\d(?![\w.])")),               # card-like digit runs
+    # The end guard rejects a following word character or a decimal point, never a sentence-ending full stop:
+    # with "(?![\w.])" a number closing a sentence ("au 06 12 34 56 78.") backtracked and left its last group.
+    # The end guard rejects a following word character or a decimal point, never a sentence-ending full stop:
+    # with "(?![\w.])" a number closing a sentence ("au 06 12 34 56 78.") backtracked and left its last group.
+    ("PHONE", re.compile(r"(?<![\w.])(?:\+|00)\d[\d\s().\-/]{7,}\d(?!\w|\.\d)")),
+    ("PHONE", re.compile(r"(?<![\w.])0\d{1,3}[\s.\-/]\d{2,4}(?:[\s.\-/]\d{2,4}){1,3}(?!\w|\.\d)")),
+    ("NUMBER", re.compile(r"(?<![\w.])(?:\d[ \-]?){12,18}\d(?!\w|\.\d)")),               # card-like digit runs
     ("HANDLE", re.compile(r"(?<![\w@])@[A-Za-z0-9_.]{2,30}\b")),
 ]
 

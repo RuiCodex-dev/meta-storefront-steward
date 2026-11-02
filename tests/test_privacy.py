@@ -71,3 +71,15 @@ def test_reidmap_is_imported_only_by_the_store_writer():
                 importers.append(py.relative_to(root).as_posix())
     allowed = {"act/writer.py", "connectors/ingest.py"}
     assert set(importers) <= allowed, importers
+
+
+def test_phone_at_sentence_end_is_removed_whole():
+    # Regression: a number closing a sentence used to keep its last group ("[PHONE] 78.").
+    for text in ("Ecrivez-moi au 06 12 34 56 78.", "Bel 02 123 45 67.", "call +32 471 23 45 67.",
+                 "card 4111 1111 1111 1111."):
+        clean, hits = scrub(text)
+        assert not any(ch.isdigit() for ch in clean), (text, clean)
+        assert hits
+    # Controls: a decimal or a version number must not be eaten as a phone.
+    assert scrub("version 2.4 crashed at level 12.")[0] == "version 2.4 crashed at level 12."
+    assert scrub("costs 0.99 now")[0] == "costs 0.99 now"

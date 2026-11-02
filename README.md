@@ -6,14 +6,18 @@ overclaim, and makes store screenshots whose app interface is provably the real 
 without a human click.**
 
 Built by Rui Codex for the Meta Global AI Developer Hackathon (Indie track, theme *Build for Your World*).
+
+**Video (2:57):** VIDEO_LINK_AT_SUBMISSION. Real recordings of the running app, synthetic AI narration (disclosed),
+captions in `video/storefront-steward.srt`.
 Everything in this repository was written during the building period (27 Oct - 4 Nov 2026); the design notes in
 `docs/` predate it and contain no code.
 
 ## The problem
 
 Rui Codex is a small studio with 40 apps and games on Google Play and the App Store. Its real feedback is not a
-flood, it is a trickle scattered everywhere: over the full history the 34 apps in scope have **49 written reviews**
-(43 of them 5-star), **40 crash/ANR issues** in the last 90 days and **68 releases**, in 9 languages. The cost is not
+flood, it is a trickle scattered everywhere: over the full history the 34 apps in scope have **51 written reviews**
+(44 of them 5-star), **42 crash/ANR issues** in the last 90 days and **68 releases**, in 9 languages (read
+2 Nov 2026; the evaluation below froze the 49 reviews that existed on 27 Oct). The cost is not
 volume; it is that the one signal that matters (a 1-star "ads after every button", a native crash that three
 different games share) sits in a different console, app and language from the next one, and gets missed.
 
@@ -143,6 +147,8 @@ python students/modal_llama.py
 ```
 
 Spend is capped in code before every call (Meta Model API USD 140, Baseten USD 90) and logged in `ops/USAGE_LOG.md`.
+The whole build used **about USD 9.5 of Meta Model API credit** (the Usage page's token totals priced at list rates;
+the console shows EUR 0.00 because the free credits were applied) and USD 8.23 of Baseten credit.
 
 ## Data statement
 
